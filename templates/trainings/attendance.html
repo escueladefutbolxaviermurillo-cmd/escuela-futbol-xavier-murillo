@@ -7,11 +7,22 @@
     <div class="col-12 col-md-8">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h3 class="fw-bold mb-0">📋 Control de Asistencia</h3>
-                <span class="badge bg-primary fs-6">{{ training.category_name }}</span>
-                <span class="text-muted ms-2">{{ training.scheduled_date.strftime('%d/%m/%Y %H:%M') }}</span>
+                <h3 class="fw-bold mb-1">📋 Control de Asistencia</h3>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary fs-6">{{ training.category_name }}</span>
+                    {% if training.shift == 'Mañana' %}
+                        <span class="badge bg-warning text-dark fs-6"><i class="bi bi-sun"></i> Mañana</span>
+                    {% elif training.shift == 'Tarde' %}
+                        <span class="badge bg-secondary fs-6"><i class="bi bi-moon-stars"></i> Tarde</span>
+                    {% else %}
+                        <span class="badge bg-info text-dark fs-6">{{ training.shift }}</span>
+                    {% endif %}
+                    <span class="text-muted small ms-1">{{ training.scheduled_date.strftime('%d/%m/%Y %H:%M') }}</span>
+                </div>
             </div>
-            <a href="{{ url_for('trainings.index') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
+            <a href="{{ url_for('trainings.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
         </div>
 
         <form action="{{ url_for('trainings.take_attendance', training_id=training._id) }}" method="POST">
@@ -43,7 +54,10 @@
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="2" class="text-center py-3 text-muted">No hay jugadores registrados en esta categoría para tomar lista.</td>
+                                <td colspan="2" class="text-center py-4 text-muted">
+                                    <i class="bi bi-people fs-2 d-block mb-2 text-secondary"></i>
+                                    No hay jugadores activos registrados en esta categoría para la jornada <strong>{{ training.shift or 'seleccionada' }}</strong>.
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

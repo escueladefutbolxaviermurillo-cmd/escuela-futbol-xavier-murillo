@@ -27,20 +27,29 @@ def create():
 
     if request.method == 'POST':
         category_id = request.form.get('category_id')
+        shift = request.form.get('shift', 'Mañana').strip()
         date_str = request.form.get('scheduled_date')
         field = request.form.get('field', 'Cancha Principal').strip()
         topic = request.form.get('topic', '').strip()
 
         if not category_id or not date_str:
-            flash("Debes seleccionar categoría y fecha para la sesión.", "danger")
+            flash("Debes seleccionar categoría, jornada y fecha para la sesión.", "danger")
             return render_template('trainings/create.html', categories=categories)
 
-        scheduled_dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M")
+        try:
+            scheduled_dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            flash("Formato de fecha u hora no válido.", "danger")
+            return render_template('trainings/create.html', categories=categories)
 
-        # Filtrar por categoría específica o traer todas
+        # Filtrar jugadores activos según categoría y jornada
         player_query = {"status": "Activo"}
+        
         if category_id != "all":
             player_query["category_id"] = ObjectId(category_id)
+            
+        if shift in ["Mañana", "Tarde"]:
+            player_query["shift"] = shift
 
         active_players = list(db.players.find(player_query).sort("last_name", 1))
 
@@ -56,6 +65,7 @@ def create():
 
         new_training = {
             "category_id": ObjectId(category_id) if category_id != "all" else None,
+            "shift": shift,
             "scheduled_date": scheduled_dt,
             "field": field,
             "topic": topic,
@@ -65,7 +75,7 @@ def create():
         }
 
         db.trainings.insert_one(new_training)
-        flash("Entrenamiento programado correctamente.", "success")
+        flash(f"Entrenamiento programado para la jornada {shift} ({len(initial_attendance)} jugadores asignados).", "success")
         return redirect(url_for('trainings.index'))
 
     return render_template('trainings/create.html', categories=categories)

@@ -12,11 +12,14 @@ players_bp = Blueprint('players', __name__, url_prefix='/players')
 def index():
     categories = list(db.categories.find()) if db is not None else []
     cat_filter = request.args.get('category_id')
+    shift_filter = request.args.get('shift')
     search_query = request.args.get('q', '').strip()
     
     query = {}
     if cat_filter:
         query['category_id'] = ObjectId(cat_filter)
+    if shift_filter:
+        query['shift'] = shift_filter
     if search_query:
         query['$or'] = [
             {'first_name': {'$regex': search_query, '$options': 'i'}},
@@ -29,7 +32,14 @@ def index():
     for p in players:
         p['category_name'] = cat_map.get(str(p.get('category_id')), 'Sin asignar')
 
-    return render_template('players/index.html', players=players, categories=categories, selected_cat=cat_filter, q=search_query)
+    return render_template(
+        'players/index.html',
+        players=players,
+        categories=categories,
+        selected_cat=cat_filter,
+        selected_shift=shift_filter,
+        q=search_query
+    )
 
 @players_bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -43,6 +53,7 @@ def create():
         birth_date = request.form.get('birth_date')
         id_card = request.form.get('identification_id', '').strip()
         category_id = request.form.get('category_id')
+        shift = request.form.get('shift', 'Mañana').strip()
         medical_notes = request.form.get('medical_notes', '').strip()
         
         rep_name = request.form.get('rep_name', '').strip()
@@ -60,6 +71,7 @@ def create():
             "identification_id": id_card,
             "birth_date": birth_date,
             "category_id": ObjectId(category_id) if category_id else None,
+            "shift": shift,
             "status": "Activo",
             "medical_notes": medical_notes,
             "representative": {
@@ -110,6 +122,7 @@ def edit(player_id):
             "identification_id": request.form.get('identification_id', '').strip(),
             "birth_date": request.form.get('birth_date'),
             "category_id": ObjectId(category_val) if category_val else None,
+            "shift": request.form.get('shift', 'Mañana').strip(),
             "status": request.form.get('status', 'Activo'),
             "medical_notes": request.form.get('medical_notes', '').strip(),
             "representative.full_name": request.form.get('rep_name', '').strip(),

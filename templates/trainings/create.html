@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-12 col-md-7">
+    <div class="col-12 col-md-8">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="fw-bold mb-0">⚽ Programar Entrenamiento</h3>
             <a href="{{ url_for('trainings.index') }}" class="btn btn-outline-secondary btn-sm">
@@ -15,25 +15,35 @@
         <div class="card border-0 shadow-sm rounded-3">
             <div class="card-body p-4">
                 <form action="{{ url_for('trainings.create') }}" method="POST">
-                    <div class="mb-3">
-    <label class="form-label fw-semibold">Categoría Convocada</label>
-    <select name="category_id" class="form-select" required>
-        <option value="" disabled>Selecciona categoría...</option>
-        <option value="all" selected>Todas las categorías (General)</option>
-        {% for cat in categories %}
-            <option value="{{ cat._id }}">{{ cat.name }}</option>
-        {% endfor %}
-    </select>
-</div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Fecha y Hora</label>
-                        <input type="datetime-local" name="scheduled_date" class="form-control" required>
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Categoría Convocada</label>
+                            <select name="category_id" class="form-select" required>
+                                <option value="" disabled>Selecciona categoría...</option>
+                                <option value="all" selected>Todas las categorías (General)</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat._id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Jornada de Entrenamiento</label>
+                            <select name="shift" class="form-select" required>
+                                <option value="Mañana" selected>🌅 Mañana</option>
+                                <option value="Tarde">🌇 Tarde</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Cancha / Ubicación</label>
-                        <input type="text" name="field" class="form-control" placeholder="Ej. Cancha Sintética 1" value="Cancha Principal">
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Fecha y Hora</label>
+                            <input type="datetime-local" name="scheduled_date" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Cancha / Ubicación</label>
+                            <input type="text" name="field" class="form-control" placeholder="Ej. Cancha Sintética 1" value="Cancha Principal">
+                        </div>
                     </div>
 
                     <div class="mb-4">

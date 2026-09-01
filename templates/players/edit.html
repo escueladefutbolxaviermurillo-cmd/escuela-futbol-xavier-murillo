@@ -41,6 +41,16 @@
                                 {% endfor %}
                             </select>
                         </div>
+
+                        <!-- Selector de Jornada -->
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Jornada de Entrenamiento</label>
+                            <select name="shift" class="form-select" required>
+                                <option value="Mañana" {% if player.shift == 'Mañana' %}selected{% endif %}>🌅 Mañana</option>
+                                <option value="Tarde" {% if player.shift == 'Tarde' %}selected{% endif %}>🌇 Tarde</option>
+                            </select>
+                        </div>
+
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold">Estado</label>
                             <select name="status" class="form-select">
@@ -49,9 +59,9 @@
                                 <option value="Suspendido" {% if player.status == 'Suspendido' %}selected{% endif %}>Suspendido</option>
                             </select>
                         </div>
-                        <div class="col-12">
+                        <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold">Observaciones Médicas</label>
-                            <input type="text" name="medical_notes" value="{{ player.medical_notes }}" class="form-control">
+                            <input type="text" name="medical_notes" value="{{ player.medical_notes }}" class="form-control" placeholder="Alergias, asma, etc.">
                         </div>
                     </div>
 

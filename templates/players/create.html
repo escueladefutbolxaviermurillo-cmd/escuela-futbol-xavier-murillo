@@ -43,7 +43,18 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        
+                        <!-- Selección de Jornada -->
                         <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Jornada de Entrenamiento</label>
+                            <select name="shift" class="form-select" required>
+                                <option value="" disabled selected>Selecciona la jornada...</option>
+                                <option value="Mañana">🌅 Mañana</option>
+                                <option value="Tarde">🌇 Tarde</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
                             <label class="form-label fw-semibold">Observaciones Médicas / Físicas</label>
                             <input type="text" name="medical_notes" class="form-control" placeholder="Alergias, asma, etc. (Opcional)">
                         </div>
