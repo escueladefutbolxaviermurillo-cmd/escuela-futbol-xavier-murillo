@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Pago - Escuela FC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold mb-0">💵 Registrar Nuevo Cobro</h3>
+            <a href="{{ url_for('payments.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body p-4">
+                <form action="{{ url_for('payments.create') }}" method="POST">
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-7">
+                            <label class="form-label fw-semibold">Jugador</label>
+                            <select name="player_id" class="form-select" required>
+                                <option value="" disabled selected>Selecciona al alumno...</option>
+                                {% for pl in players %}
+                                    <option value="{{ pl._id }}">{{ pl.last_name }} {{ pl.first_name }} ({{ pl.identification_id }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label fw-semibold">Concepto</label>
+                            <select name="concept" class="form-select" required>
+                                <option value="Mensualidad" selected>Mensualidad</option>
+                                <option value="Matrícula">Matrícula</option>
+                                <option value="Uniforme">Uniforme</option>
+                                <option value="Torneo / Inscripción">Torneo / Inscripción</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Monto ($ USD)</label>
+                            <input type="number" step="0.01" min="0.5" name="amount" class="form-control" placeholder="30.00" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Mes Correspondiente (Opcional)</label>
+                            <input type="text" name="month_covered" class="form-control" placeholder="Ej. Septiembre 2026">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Método de Pago</label>
+                            <select name="payment_method" class="form-select">
+                                <option value="Efectivo" selected>Efectivo</option>
+                                <option value="Transferencia / Depósito">Transferencia / Depósito</option>
+                                <option value="Tarjeta de Débito/Crédito">Tarjeta de Débito/Crédito</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Nº Comprobante / Transacción</label>
+                            <input type="text" name="transaction_ref" class="form-control" placeholder="Ej. TRANS-849204 (opcional)">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Estado del Pago</label>
+                            <select name="status" class="form-select">
+                                <option value="Completado" selected>Completado</option>
+                                <option value="Pendiente">Pendiente</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Notas / Observaciones</label>
+                            <input type="text" name="notes" class="form-control" placeholder="Detalle adicional">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('payments.index') }}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-success px-4 fw-semibold">Emitir Recibo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

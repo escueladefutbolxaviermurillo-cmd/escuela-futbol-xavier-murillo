@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Categorías - Escuela De Futbol Xavier Murillo{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0">🏆 Categorías Formativas</h3>
+        <p class="text-muted mb-0">Gestión de divisiones y rangos de edad</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreateCategory">
+        <i class="bi bi-plus-circle me-1"></i> Nueva Categoría
+    </button>
+</div>
+
+<!-- Tabla de Categorías -->
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Nombre de la Categoría</th>
+                    <th>Descripción / Rango de Edad</th>
+                    <th class="text-center">Alumnos Activos</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td>
+                        <span class="badge bg-primary fs-6">{{ cat.name }}</span>
+                    </td>
+                    <td>{{ cat.description or 'Sin descripción adicional' }}</td>
+                    <td class="text-center">
+                        <span class="badge bg-light text-dark border px-3 py-2 fw-semibold">
+                            <i class="bi bi-people me-1"></i> {{ cat.player_count }}
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEdit{{ cat._id }}">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </button>
+
+                        {% if cat.player_count == 0 %}
+                        <form action="{{ url_for('categories.delete', category_id=cat._id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar la categoría {{ cat.name }}?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-sm btn-outline-secondary" disabled title="No se puede eliminar con alumnos asignados">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <!-- Modal Editar Categoría -->
+                <div class="modal fade" id="modalEdit{{ cat._id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title fw-bold">✏️ Editar Categoría</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form action="{{ url_for('categories.edit', category_id=cat._id) }}" method="POST">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Nombre</label>
+                                        <input type="text" name="name" class="form-control" value="{{ cat.name }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Descripción / Observación</label>
+                                        <input type="text" name="description" class="form-control" value="{{ cat.description or '' }}">
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary px-4 fw-semibold">Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">No hay categorías configuradas en el sistema.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Crear Categoría -->
+<div class="modal fade" id="modalCreateCategory" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">🏆 Nueva Categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('categories.create') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre de la Categoría</label>
+                        <input type="text" name="name" class="form-control" placeholder="Ej. Sub-6, Sub-20, Femenino Libre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Descripción / Rango de Edad (Opcional)</label>
+                        <input type="text" name="description" class="form-control" placeholder="Ej. Nacidos entre 2018 y 2019">
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">Crear Categoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

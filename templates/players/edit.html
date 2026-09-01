@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Jugador - Escuela FC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold mb-0">✏️ Editar Jugador</h3>
+            <a href="{{ url_for('players.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body p-4">
+                <form action="{{ url_for('players.edit', player_id=player._id) }}" method="POST">
+                    <h5 class="fw-bold text-primary mb-3">Datos del Jugador</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Nombres</label>
+                            <input type="text" name="first_name" value="{{ player.first_name }}" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Apellidos</label>
+                            <input type="text" name="last_name" value="{{ player.last_name }}" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Cédula</label>
+                            <input type="text" name="identification_id" value="{{ player.identification_id }}" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Fecha de Nacimiento</label>
+                            <input type="date" name="birth_date" value="{{ player.birth_date }}" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Categoría</label>
+                            <select name="category_id" class="form-select" required>
+                                {% for cat in categories %}
+                                    <option value="{{ cat._id }}" {% if player.category_id|string == cat._id|string %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Estado</label>
+                            <select name="status" class="form-select">
+                                <option value="Activo" {% if player.status == 'Activo' %}selected{% endif %}>Activo</option>
+                                <option value="Inactivo" {% if player.status == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+                                <option value="Suspendido" {% if player.status == 'Suspendido' %}selected{% endif %}>Suspendido</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Observaciones Médicas</label>
+                            <input type="text" name="medical_notes" value="{{ player.medical_notes }}" class="form-control">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="fw-bold text-primary mb-3">Datos del Representante</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Nombre Completo</label>
+                            <input type="text" name="rep_name" value="{{ player.representative.full_name }}" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Cédula</label>
+                            <input type="text" name="rep_id" value="{{ player.representative.identification_id }}" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Teléfono</label>
+                            <input type="tel" name="rep_phone" value="{{ player.representative.phone }}" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-semibold">Correo</label>
+                            <input type="email" name="rep_email" value="{{ player.representative.email }}" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('players.index') }}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

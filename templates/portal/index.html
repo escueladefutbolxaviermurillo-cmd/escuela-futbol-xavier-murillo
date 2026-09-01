@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Portal del Representante - Escuela De Futbol Xavier Murillo{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0">👨‍👦 Portal del Representante</h3>
+        <p class="text-muted mb-0">Bienvenido/a, {{ session.get('full_name') }}. Consulta el progreso de tus representados.</p>
+    </div>
+    <span class="badge bg-primary px-3 py-2 fs-6">
+        <i class="bi bi-person-check me-1"></i> Perfil Representante
+    </span>
+</div>
+
+{% for data in children_data %}
+<div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+    <!-- Encabezado del Jugador -->
+    <div class="card-header bg-dark text-white p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold fs-4" style="width: 55px; height: 55px;">
+                {{ data.player.first_name[0] }}{{ data.player.last_name[0] }}
+            </div>
+            <div>
+                <h4 class="fw-bold mb-1">{{ data.player.first_name }} {{ data.player.last_name }}</h4>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge bg-light text-dark">{{ data.category_name }}</span>
+                    <small class="text-white-50">C.I: {{ data.player.identification_id }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-success fs-6 px-3 py-2">Estado: {{ data.player.status }}</span>
+        </div>
+    </div>
+
+    <div class="card-body p-4">
+        <!-- Métricas Rápidas -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="card border bg-light text-center py-3 rounded-3">
+                    <h6 class="text-muted small mb-1">Rendimiento de Asistencia</h6>
+                    <h3 class="fw-bold mb-0 text-info">{{ data.porcentaje_asistencia }}%</h3>
+                    <small class="text-muted">{{ data.total_sesiones }} prácticas registradas</small>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card border bg-light text-center py-3 rounded-3">
+                    <h6 class="text-muted small mb-1">Total Cancelado</h6>
+                    <h3 class="fw-bold mb-0 text-success">${{ "%.2f"|format(data.total_pagado) }}</h3>
+                    <small class="text-muted">Mensualidades al día</small>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card border bg-light text-center py-3 rounded-3">
+                    <h6 class="text-muted small mb-1">Valores Pendientes</h6>
+                    <h3 class="fw-bold mb-0 text-danger">${{ "%.2f"|format(data.total_pendiente) }}</h3>
+                    <small class="text-muted">Por confirmar / procesar</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestañas de Historial -->
+        <ul class="nav nav-tabs mb-3" id="tabJugador{{ data.player._id }}" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active fw-semibold" id="asistencia-tab-{{ data.player._id }}" data-bs-toggle="tab" data-bs-target="#asistencia-{{ data.player._id }}" type="button" role="tab">
+                    <i class="bi bi-calendar-check me-1"></i> Asistencia a Entrenamientos
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link fw-semibold" id="pagos-tab-{{ data.player._id }}" data-bs-toggle="tab" data-bs-target="#pagos-{{ data.player._id }}" type="button" role="tab">
+                    <i class="bi bi-cash-stack me-1"></i> Estado de Pagos y Recibos
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="tabContent{{ data.player._id }}">
+            <!-- Tab Asistencias -->
+            <div class="tab-pane fade show active" id="asistencia-{{ data.player._id }}" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Enfoque Técnico</th>
+                                <th>Cancha</th>
+                                <th class="text-end">Asistencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for att in data.attendance_records %}
+                            <tr>
+                                <td>{{ att.date.strftime('%d/%m/%Y %H:%M') if att.date else '-' }}</td>
+                                <td>{{ att.topic }}</td>
+                                <td>{{ att.field }}</td>
+                                <td class="text-end">
+                                    <span class="badge bg-{{ 'success' if att.status == 'Presente' else ('danger' if att.status == 'Ausente' else 'warning text-dark') }}">
+                                        {{ att.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">Aún no se registran entrenamientos asistidos.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Pagos -->
+            <div class="tab-pane fade" id="pagos-{{ data.player._id }}" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nº Recibo</th>
+                                <th>Fecha de Pago</th>
+                                <th>Concepto</th>
+                                <th>Método</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th class="text-end">Comprobante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in data.payments %}
+                            <tr>
+                                <td class="fw-bold text-primary">{{ p.receipt_number }}</td>
+                                <td>{{ p.payment_date.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    {{ p.concept }}
+                                    {% if p.month_covered %}<small class="d-block text-muted">{{ p.month_covered }}</small>{% endif %}
+                                </td>
+                                <td>{{ p.payment_method }}</td>
+                                <td class="fw-bold">${{ "%.2f"|format(p.amount) }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if p.status == 'Completado' else 'warning text-dark' }}">
+                                        {{ p.status }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('payments.receipt', payment_id=p._id) }}" target="_blank" class="btn btn-sm btn-outline-dark">
+                                        <i class="bi bi-printer me-1"></i> Ver Recibo
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">No se registran transacciones contables registradas.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card border-0 shadow-sm rounded-3 p-5 text-center text-muted">
+    <i class="bi bi-person-x fs-1 mb-2"></i>
+    <h5>No hay registros vinculados</h5>
+    <p class="mb-0">No se encontraron alumnos asociados a tu cédula en el sistema.</p>
+</div>
+{% endfor %}
+{% endblock %}

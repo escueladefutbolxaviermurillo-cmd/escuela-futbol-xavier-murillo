@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Jugadores - Escuela De Futbol Xavier Murillo{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0">⚽ Registro de Jugadores</h3>
+        <p class="text-muted mb-0">Gestión de alumnos y categorías formativas</p>
+    </div>
+    {% if session.get('role') == 'Administrador' %}
+    <a href="{{ url_for('players.create') }}" class="btn btn-primary">
+        <i class="bi bi-person-plus-fill me-1"></i> Registrar Jugador
+    </a>
+    {% endif %}
+</div>
+
+<!-- Filtros de búsqueda (RF14) -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('players.index') }}" class="row g-2">
+            <div class="col-12 col-md-5">
+                <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Buscar por nombre o cédula...">
+            </div>
+            <div class="col-12 col-md-4">
+                <select name="category_id" class="form-select">
+                    <option value="">Todas las categorías</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat._id }}" {% if selected_cat == cat._id|string %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-search"></i> Filtrar</button>
+                <a href="{{ url_for('players.index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de Jugadores (RF03) -->
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Jugador</th>
+                    <th>Cédula</th>
+                    <th>Categoría</th>
+                    <th>Representante</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                <tr>
+                    <td class="fw-semibold">
+                        <a href="{{ url_for('players.detail', player_id=player._id) }}" class="text-decoration-none text-dark fw-bold">
+                            {{ player.last_name }} {{ player.first_name }}
+                        </a>
+                    </td>
+                    <td>{{ player.identification_id }}</td>
+                    <td><span class="badge bg-primary">{{ player.category_name }}</span></td>
+                    <td>
+                        <div class="fw-semibold">{{ player.representative.full_name }}</div>
+                        <small class="text-muted"><i class="bi bi-telephone"></i> {{ player.representative.phone }}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if player.status == 'Activo' else 'danger' }}">
+                            {{ player.status }}
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a href="{{ url_for('players.detail', player_id=player._id) }}" class="btn btn-sm btn-outline-info me-1" title="Ver Ficha Completa">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        {% if session.get('role') == 'Administrador' %}
+                        <a href="{{ url_for('players.edit', player_id=player._id) }}" class="btn btn-sm btn-outline-primary" title="Editar">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        <i class="bi bi-people fs-2 d-block mb-1"></i>
+                        No hay jugadores registrados con los filtros seleccionados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

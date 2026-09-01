@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Tomar Lista - Escuela FC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h3 class="fw-bold mb-0">📋 Control de Asistencia</h3>
+                <span class="badge bg-primary fs-6">{{ training.category_name }}</span>
+                <span class="text-muted ms-2">{{ training.scheduled_date.strftime('%d/%m/%Y %H:%M') }}</span>
+            </div>
+            <a href="{{ url_for('trainings.index') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
+        </div>
+
+        <form action="{{ url_for('trainings.take_attendance', training_id=training._id) }}" method="POST">
+            <div class="card border-0 shadow-sm rounded-3 mb-3">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Jugador</th>
+                                <th class="text-end">Estado de Asistencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in training.attendance %}
+                            <tr>
+                                <td class="fw-semibold">{{ record.player_name }}</td>
+                                <td class="text-end">
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="status_{{ record.player_id }}" id="p_{{ record.player_id }}" value="Presente" {% if record.status == 'Presente' %}checked{% endif %}>
+                                        <label class="btn btn-outline-success btn-sm" for="p_{{ record.player_id }}">Presente</label>
+
+                                        <input type="radio" class="btn-check" name="status_{{ record.player_id }}" id="a_{{ record.player_id }}" value="Ausente" {% if record.status == 'Ausente' %}checked{% endif %}>
+                                        <label class="btn btn-outline-danger btn-sm" for="a_{{ record.player_id }}">Ausente</label>
+
+                                        <input type="radio" class="btn-check" name="status_{{ record.player_id }}" id="j_{{ record.player_id }}" value="Justificado" {% if record.status == 'Justificado' %}checked{% endif %}>
+                                        <label class="btn btn-outline-warning btn-sm" for="j_{{ record.player_id }}">Justificado</label>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center py-3 text-muted">No hay jugadores registrados en esta categoría para tomar lista.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if training.attendance %}
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                    <i class="bi bi-save me-1"></i> Guardar Asistencia
+                </button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

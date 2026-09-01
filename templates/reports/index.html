@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes y Métricas - Escuela De Futbol Xavier Murillo{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0">📊 Reportes y Estadísticas</h3>
+        <p class="text-muted mb-0">Consolidado financiero y distribución operativa</p>
+    </div>
+    <a href="{{ url_for('reports.export_payments_csv') }}" class="btn btn-outline-success">
+        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportar Pagos a CSV / Excel
+    </a>
+</div>
+
+<!-- Métricas Destacadas -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm bg-success text-white">
+            <div class="card-body">
+                <h6 class="text-white-50 mb-1">Recaudación Total Efectiva</h6>
+                <h3 class="fw-bold mb-0">${{ "%.2f"|format(total_ingresos) }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm bg-warning text-dark">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Pagos por Confirmar</h6>
+                <h3 class="fw-bold mb-0">{{ total_cobros_pendientes }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm bg-dark text-white">
+            <div class="card-body">
+                <h6 class="text-white-50 mb-1">Total Sesiones Programadas</h6>
+                <h3 class="fw-bold mb-0">{{ total_entrenamientos }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Ingresos por Concepto -->
+    <div class="col-12 col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="fw-bold mb-0">💵 Ingresos por Concepto</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Concepto</th>
+                                <th class="text-center">Transacciones</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in payments_by_concept %}
+                            <tr>
+                                <td class="fw-semibold">{{ item._id }}</td>
+                                <td class="text-center">{{ item.count }}</td>
+                                <td class="text-end fw-bold text-success">${{ "%.2f"|format(item.total) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-3 text-muted">No se registran cobros completados aún.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alumnos por Categoría -->
+    <div class="col-12 col-lg-6">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white border-0 pt-3">
+                <h5 class="fw-bold mb-0">⚽ Alumnos Activos por Categoría</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Categoría</th>
+                                <th class="text-end">Cantidad de Alumnos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat in cat_counts %}
+                            <tr>
+                                <td class="fw-semibold">{{ cat.name }}</td>
+                                <td class="text-end">
+                                    <span class="badge bg-primary fs-6">{{ cat.count }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

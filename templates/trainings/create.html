@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Programar Sesión - Escuela FC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-7">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold mb-0">⚽ Programar Entrenamiento</h3>
+            <a href="{{ url_for('trainings.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body p-4">
+                <form action="{{ url_for('trainings.create') }}" method="POST">
+                    <div class="mb-3">
+    <label class="form-label fw-semibold">Categoría Convocada</label>
+    <select name="category_id" class="form-select" required>
+        <option value="" disabled>Selecciona categoría...</option>
+        <option value="all" selected>Todas las categorías (General)</option>
+        {% for cat in categories %}
+            <option value="{{ cat._id }}">{{ cat.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Fecha y Hora</label>
+                        <input type="datetime-local" name="scheduled_date" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Cancha / Ubicación</label>
+                        <input type="text" name="field" class="form-control" placeholder="Ej. Cancha Sintética 1" value="Cancha Principal">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Tema / Enfoque Técnico</label>
+                        <input type="text" name="topic" class="form-control" placeholder="Ej. Definición y transición defensiva">
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('trainings.index') }}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-success px-4 fw-semibold">Guardar Sesión</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

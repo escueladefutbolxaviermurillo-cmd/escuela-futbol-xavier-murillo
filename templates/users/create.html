@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Usuario - Escuela FC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold mb-0">👤 Registrar Usuario</h3>
+            <a href="{{ url_for('users.index') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body p-4">
+                <form action="{{ url_for('users.create') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre Completo</label>
+                        <input type="text" name="full_name" class="form-control" placeholder="Ej. Profe Xavier Murillo" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nombre de Usuario (Login)</label>
+                        <input type="text" name="username" class="form-control" placeholder="xavierm" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rol en el Sistema</label>
+                        <select name="role" class="form-select" required>
+                            <option value="Entrenador" selected>Entrenador</option>
+                            <option value="Administrador">Administrador</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Contraseña Inicial</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('users.index') }}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Crear Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
