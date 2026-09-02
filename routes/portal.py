@@ -71,3 +71,9 @@ def index():
         })
 
     return render_template('portal/index.html', children_data=children_data)
+
+@portal_bp.route('/datos-bancarios')
+@login_required
+@role_required(['Representante', 'Administrador'])
+def bank_info():
+    return render_template('portal/bank_info.html')
