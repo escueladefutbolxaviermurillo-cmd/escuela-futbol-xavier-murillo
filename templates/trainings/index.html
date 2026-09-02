@@ -81,11 +81,11 @@
         color: #ffffff;
     }
 
-    /* Botón dual de acción */
+    /* Botones de acción limpios */
     .btn-take-attendance {
         background-color: #ffffff;
         border: 1.5px solid #cbd5e1;
-        border-radius: 10px 0 0 10px;
+        border-radius: 10px;
         color: #334155;
         font-weight: 600;
         font-size: 0.83rem;
@@ -98,17 +98,19 @@
         color: #0f172a;
     }
 
-    .btn-more-actions {
+    .btn-manage-session {
         background-color: #ffffff;
         border: 1.5px solid #cbd5e1;
-        border-left: none;
-        border-radius: 0 10px 10px 0;
-        color: #64748b;
-        padding: 0.45rem 0.65rem;
+        border-radius: 10px;
+        color: #475569;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.9rem;
+        transition: all 0.15s ease;
     }
-    .btn-more-actions:hover {
+    .btn-manage-session:hover {
         background-color: #f1f5f9;
         color: #0f172a;
+        border-color: #94a3b8;
     }
 </style>
 
@@ -190,27 +192,21 @@
 
                         <!-- Estado -->
                         <td>
-                            <span class="badge-status-pill bg-{{ 'secondary' if t.status == 'Programado' else 'success' }}">
-                                <i class="bi bi-{{ 'clock' if t.status == 'Programado' else 'check-circle' }} me-1"></i>{{ t.status }}
+                            <span class="badge-status-pill bg-{{ 'secondary' if t.status == 'Programado' else ('danger' if t.status == 'Cancelado' else 'success') }}">
+                                <i class="bi bi-{{ 'clock' if t.status == 'Programado' else ('x-circle' if t.status == 'Cancelado' else 'check-circle') }} me-1"></i>{{ t.status }}
                             </span>
                         </td>
 
                         <!-- Acciones -->
                         <td class="text-end pe-3">
-                            <div class="btn-group">
-                                <a href="{{ url_for('trainings.take_attendance', training_id=t._id) }}" class="btn btn-take-attendance">
+                            <div class="d-inline-flex align-items-center gap-2">
+                                <a href="{{ url_for('trainings.take_attendance', training_id=t._id) }}" class="btn-take-attendance">
                                     <i class="bi bi-check2-square text-primary me-1"></i> Tomar Lista ({{ t.total_attendees or 0 }})
                                 </a>
-                                <button type="button" class="btn btn-more-actions dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+
+                                <button type="button" class="btn-manage-session" data-bs-toggle="modal" data-bs-target="#modalTraining{{ t._id }}" title="Gestionar Sesión">
                                     <i class="bi bi-three-dots-vertical"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
-                                    <li>
-                                        <a class="dropdown-item py-2" href="{{ url_for('trainings.take_attendance', training_id=t._id) }}">
-                                            <i class="bi bi-pencil me-2 text-muted"></i> Modificar Asistencias
-                                        </a>
-                                    </li>
-                                </ul>
                             </div>
                         </td>
                     </tr>
@@ -228,4 +224,87 @@
     </div>
 
 </div>
+
+<!-- Modales ubicados fuera de la tabla para evitar desbordamientos -->
+{% for t in trainings %}
+<div class="modal fade text-start" id="modalTraining{{ t._id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4" style="background-color: #fdfbf7;">
+            <div class="modal-header border-0 pb-1 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                    ⚽ Gestión de Entrenamiento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="{{ url_for('trainings.edit', training_id=t._id) }}" method="POST">
+                <div class="modal-body px-4 py-3">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Fecha y Hora</label>
+                        <input type="datetime-local" name="scheduled_date" class="form-control rounded-3" value="{{ t.scheduled_date.strftime('%Y-%m-%dT%H:%M') if t.scheduled_date else '' }}" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-7">
+                            <label class="form-label small fw-semibold text-dark">Categoría</label>
+                            <select name="category_id" class="form-select rounded-3">
+                                <option value="all">General (Todas)</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat._id }}" {% if t.category_id and t.category_id|string == cat._id|string %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label small fw-semibold text-dark">Jornada</label>
+                            <select name="shift" class="form-select rounded-3">
+                                <option value="Mañana" {% if t.shift == 'Mañana' %}selected{% endif %}>Mañana</option>
+                                <option value="Tarde" {% if t.shift == 'Tarde' %}selected{% endif %}>Tarde</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Cancha / Lugar</label>
+                        <input type="text" name="field" class="form-control rounded-3" value="{{ t.field or 'Cancha Principal' }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Tema / Objetivo</label>
+                        <input type="text" name="topic" class="form-control rounded-3" value="{{ t.topic or '' }}" placeholder="Ej. Táctica, posesión">
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold text-dark">Estado</label>
+                        <select name="status" class="form-select rounded-3">
+                            <option value="Programado" {% if t.status == 'Programado' %}selected{% endif %}>Programado</option>
+                            <option value="Completado" {% if t.status == 'Completado' %}selected{% endif %}>Completado</option>
+                            <option value="Cancelado" {% if t.status == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 px-4 pb-4 pt-2 d-flex justify-content-between align-items-center">
+                    {% if session.get('role') == 'Administrador' %}
+                    <button type="button" class="btn btn-outline-danger btn-sm rounded-3" onclick="if(confirm('¿Eliminar esta sesión de entrenamiento y sus registros?')) { document.getElementById('deleteForm{{ t._id }}').submit(); }">
+                        <i class="bi bi-trash3 me-1"></i> Eliminar
+                    </button>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary rounded-3 fw-semibold px-4">Guardar Cambios</button>
+                    </div>
+                </div>
+            </form>
+
+            {% if session.get('role') == 'Administrador' %}
+            <form id="deleteForm{{ t._id }}" action="{{ url_for('trainings.delete', training_id=t._id) }}" method="POST" style="display: none;"></form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 {% endblock %}

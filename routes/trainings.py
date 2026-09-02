@@ -42,9 +42,7 @@ def create():
             flash("Formato de fecha u hora no válido.", "danger")
             return render_template('trainings/create.html', categories=categories)
 
-        # Filtrar jugadores activos según categoría y jornada
         player_query = {"status": "Activo"}
-        
         if category_id != "all":
             player_query["category_id"] = ObjectId(category_id)
             
@@ -53,7 +51,6 @@ def create():
 
         active_players = list(db.players.find(player_query).sort("last_name", 1))
 
-        # Estructura inicial de asistencia
         initial_attendance = [
             {
                 "player_id": p['_id'],
@@ -79,6 +76,56 @@ def create():
         return redirect(url_for('trainings.index'))
 
     return render_template('trainings/create.html', categories=categories)
+
+@trainings_bp.route('/<training_id>/edit', methods=['POST'])
+@login_required
+@role_required(['Administrador', 'Entrenador'])
+def edit(training_id):
+    training = db.trainings.find_one({"_id": ObjectId(training_id)})
+    if not training:
+        flash("Sesión no encontrada.", "danger")
+        return redirect(url_for('trainings.index'))
+
+    category_id = request.form.get('category_id')
+    shift = request.form.get('shift', 'Mañana').strip()
+    date_str = request.form.get('scheduled_date')
+    field = request.form.get('field', 'Cancha Principal').strip()
+    topic = request.form.get('topic', '').strip()
+    status = request.form.get('status', 'Programado')
+
+    try:
+        scheduled_dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M")
+    except (ValueError, TypeError):
+        flash("Formato de fecha u hora no válido.", "danger")
+        return redirect(url_for('trainings.index'))
+
+    cat_oid = ObjectId(category_id) if category_id and category_id != "all" else None
+
+    update_fields = {
+        "category_id": cat_oid,
+        "shift": shift,
+        "scheduled_date": scheduled_dt,
+        "field": field,
+        "topic": topic,
+        "status": status
+    }
+
+    db.trainings.update_one({"_id": ObjectId(training_id)}, {"$set": update_fields})
+    flash("Sesión de entrenamiento actualizada correctamente.", "success")
+    return redirect(url_for('trainings.index'))
+
+@trainings_bp.route('/<training_id>/delete', methods=['POST'])
+@login_required
+@role_required(['Administrador'])
+def delete(training_id):
+    training = db.trainings.find_one({"_id": ObjectId(training_id)})
+    if not training:
+        flash("Sesión no encontrada.", "danger")
+        return redirect(url_for('trainings.index'))
+
+    db.trainings.delete_one({"_id": ObjectId(training_id)})
+    flash("Sesión de entrenamiento eliminada exitosamente.", "info")
+    return redirect(url_for('trainings.index'))
 
 @trainings_bp.route('/<training_id>/attendance', methods=['GET', 'POST'])
 @login_required
