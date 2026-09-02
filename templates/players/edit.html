@@ -87,10 +87,40 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ url_for('players.index') }}" class="btn btn-light border px-4">Cancelar</a>
-                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Guardar Cambios</button>
+                    <!-- Botones de Acción -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePlayerModal">
+                            <i class="bi bi-trash3 me-1"></i> Eliminar Jugador
+                        </button>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('players.index') }}" class="btn btn-light border px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">Guardar Cambios</button>
+                        </div>
                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+<div class="modal fade" id="deletePlayerModal" tabindex="-1" aria-labelledby="deletePlayerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="deletePlayerModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Eliminar Jugador
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <p class="fs-5 mb-2">¿Estás seguro de que deseas eliminar a <strong>{{ player.first_name }} {{ player.last_name }}</strong>?</p>
+                <p class="text-muted small mb-0">Esta acción eliminará sus registros de pagos y asistencias. Si el representante no tiene otros alumnos activos, su cuenta de usuario también será dada de baja.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-light px-4 border" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('players.delete', player_id=player._id) }}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger px-4 fw-bold">Sí, Eliminar Definitivamente</button>
                 </form>
             </div>
         </div>

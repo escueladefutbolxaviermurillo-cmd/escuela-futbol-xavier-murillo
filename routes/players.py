@@ -85,7 +85,7 @@ def create():
 
         db.players.insert_one(new_player)
 
-        # Generar cuenta de acceso para el Representante si se ingresó cédula
+        # Habilitar o vincular cuenta del Representante
         if rep_id:
             existing_user = db.users.find_one({"username": rep_id})
             if not existing_user:
@@ -93,12 +93,12 @@ def create():
                     "username": rep_id,
                     "full_name": rep_name or f"Rep. {last_name}",
                     "role": "Representante",
-                    "password_hash": generate_password_hash(rep_id),  # Contraseña inicial = número de cédula
+                    "password_hash": generate_password_hash(rep_id),
                     "is_active": True,
                     "created_at": datetime.utcnow()
                 })
 
-        flash("Jugador registrado exitosamente. Se ha habilitado el acceso para el representante.", "success")
+        flash("Jugador registrado exitosamente. Acceso de representante habilitado.", "success")
         return redirect(url_for('players.index'))
 
     return render_template('players/create.html', categories=categories)
@@ -116,26 +116,111 @@ def edit(player_id):
 
     if request.method == 'POST':
         category_val = request.form.get('category_id')
+        new_first_name = request.form.get('first_name', '').strip()
+        new_last_name = request.form.get('last_name', '').strip()
+
+        new_rep_name = request.form.get('rep_name', '').strip()
+        new_rep_id = request.form.get('rep_id', '').strip()
+        new_rep_phone = request.form.get('rep_phone', '').strip()
+        new_rep_email = request.form.get('rep_email', '').strip()
+
+        old_rep_id = player.get('representative', {}).get('identification_id', '').strip()
+
+        # 1. Actualizar datos del jugador
         update_data = {
-            "first_name": request.form.get('first_name', '').strip(),
-            "last_name": request.form.get('last_name', '').strip(),
+            "first_name": new_first_name,
+            "last_name": new_last_name,
             "identification_id": request.form.get('identification_id', '').strip(),
             "birth_date": request.form.get('birth_date'),
             "category_id": ObjectId(category_val) if category_val else None,
             "shift": request.form.get('shift', 'Mañana').strip(),
             "status": request.form.get('status', 'Activo'),
             "medical_notes": request.form.get('medical_notes', '').strip(),
-            "representative.full_name": request.form.get('rep_name', '').strip(),
-            "representative.identification_id": request.form.get('rep_id', '').strip(),
-            "representative.phone": request.form.get('rep_phone', '').strip(),
-            "representative.email": request.form.get('rep_email', '').strip()
+            "representative.full_name": new_rep_name,
+            "representative.identification_id": new_rep_id,
+            "representative.phone": new_rep_phone,
+            "representative.email": new_rep_email
         }
-        
         db.players.update_one({"_id": ObjectId(player_id)}, {"$set": update_data})
-        flash("Información del jugador actualizada.", "success")
+
+        # 2. Sincronizar nombre del jugador en asistencias previas
+        full_player_name = f"{new_last_name} {new_first_name}"
+        db.trainings.update_many(
+            {"attendance.player_id": ObjectId(player_id)},
+            {"$set": {"attendance.$[elem].player_name": full_player_name}},
+            array_filters=[{"elem.player_id": ObjectId(player_id)}]
+        )
+
+        # 3. Sincronizar cuenta de usuario del representante
+        if old_rep_id and new_rep_id:
+            user_account = db.users.find_one({"username": old_rep_id, "role": "Representante"})
+            
+            if user_account:
+                user_updates = {"full_name": new_rep_name}
+                if old_rep_id != new_rep_id:
+                    user_updates["username"] = new_rep_id
+                    # Actualizar cédula en los demás hijos registrados
+                    db.players.update_many(
+                        {"representative.identification_id": old_rep_id},
+                        {"$set": {
+                            "representative.identification_id": new_rep_id,
+                            "representative.full_name": new_rep_name,
+                            "representative.phone": new_rep_phone,
+                            "representative.email": new_rep_email
+                        }}
+                    )
+                db.users.update_one({"_id": user_account['_id']}, {"$set": user_updates})
+            else:
+                if not db.users.find_one({"username": new_rep_id}):
+                    db.users.insert_one({
+                        "username": new_rep_id,
+                        "full_name": new_rep_name or f"Rep. {new_last_name}",
+                        "role": "Representante",
+                        "password_hash": generate_password_hash(new_rep_id),
+                        "is_active": True,
+                        "created_at": datetime.utcnow()
+                    })
+
+        flash("Información del jugador y cuenta del representante sincronizadas correctamente.", "success")
         return redirect(url_for('players.index'))
 
     return render_template('players/edit.html', player=player, categories=categories)
+
+@players_bp.route('/<player_id>/delete', methods=['POST'])
+@login_required
+@role_required(['Administrador'])
+def delete(player_id):
+    player = db.players.find_one({"_id": ObjectId(player_id)})
+    if not player:
+        flash("El jugador no existe o ya fue eliminado.", "danger")
+        return redirect(url_for('players.index'))
+
+    rep_id = player.get('representative', {}).get('identification_id')
+
+    # 1. Eliminar jugador
+    db.players.delete_one({"_id": ObjectId(player_id)})
+
+    # 2. Retirar jugador de listas de asistencias
+    db.trainings.update_many(
+        {},
+        {"$pull": {"attendance": {"player_id": ObjectId(player_id)}}}
+    )
+
+    # 3. Eliminar pagos y recibos asociados
+    db.payments.delete_many({"player_id": ObjectId(player_id)})
+
+    # 4. Comprobar si el representante tiene otros hijos inscritos
+    if rep_id:
+        remaining_children = db.players.count_documents({"representative.identification_id": rep_id})
+        if remaining_children == 0:
+            db.users.delete_one({"username": rep_id, "role": "Representante"})
+            flash("Jugador eliminado y usuario del representante retirado (sin otros alumnos vinculados).", "info")
+        else:
+            flash(f"Jugador eliminado. La cuenta del representante permanece activa ({remaining_children} alumno(s) aún a su cargo).", "info")
+    else:
+        flash("Jugador eliminado exitosamente.", "success")
+
+    return redirect(url_for('players.index'))
 
 @players_bp.route('/<player_id>')
 @login_required
@@ -145,16 +230,13 @@ def detail(player_id):
         flash("Jugador no encontrado.", "danger")
         return redirect(url_for('players.index'))
 
-    # Nombre de la categoría
     category = db.categories.find_one({"_id": player.get("category_id")})
     player['category_name'] = category['name'] if category else 'Sin asignar'
 
-    # Historial de pagos
     payments = list(db.payments.find({"player_id": ObjectId(player_id)}).sort('payment_date', -1)) if db is not None else []
     total_pagado = sum(p.get('amount', 0.0) for p in payments if p.get('status') == 'Completado')
     total_pendiente = sum(p.get('amount', 0.0) for p in payments if p.get('status') == 'Pendiente')
 
-    # Historial de asistencias en entrenamientos
     trainings = list(db.trainings.find({"attendance.player_id": ObjectId(player_id)}).sort('scheduled_date', -1)) if db is not None else []
     attendance_history = []
     total_presentes = 0
