@@ -159,7 +159,9 @@ def edit(player_id):
                 user_updates = {"full_name": new_rep_name}
                 if old_rep_id != new_rep_id:
                     user_updates["username"] = new_rep_id
-                    # Actualizar cédula en los demás hijos registrados
+                    user_updates["password_hash"] = generate_password_hash(new_rep_id)  # Actualiza la contraseña al nuevo número de cédula
+                    
+                    # Actualizar cédula y contacto en los demás hijos registrados
                     db.players.update_many(
                         {"representative.identification_id": old_rep_id},
                         {"$set": {
@@ -181,7 +183,7 @@ def edit(player_id):
                         "created_at": datetime.utcnow()
                     })
 
-        flash("Información del jugador y cuenta del representante sincronizadas correctamente.", "success")
+        flash("Información del jugador y credenciales del representante sincronizadas correctamente.", "success")
         return redirect(url_for('players.index'))
 
     return render_template('players/edit.html', player=player, categories=categories)
