@@ -1,144 +1,403 @@
 {% extends 'base.html' %}
 
-{% block title %}Control de Pagos - Escuela De Futbol Xavier Murillo{% endblock %}
+{% block title %}Control de Pagos y Mensualidades - Escuela De Fútbol Xavier Murillo{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-0">💵 Control de Pagos y Mensualidades</h3>
-        <p class="text-muted mb-0">Registro contable, mensualidades y emisión de comprobantes</p>
-    </div>
-    <a href="{{ url_for('payments.create') }}" class="btn btn-success">
-        <i class="bi bi-plus-circle me-1"></i> Registrar Cobro
-    </a>
-</div>
+<style>
+    /* Botón Superior Registrar Cobro */
+    .btn-quick-create {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 0.55rem 1.25rem;
+        font-weight: 600;
+        font-size: 0.88rem;
+        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .btn-quick-create:hover {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
 
-<!-- Filtros y Resumen -->
-<div class="row g-3 mb-4">
-    <div class="col-12 col-xl-9">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <form method="GET" action="{{ url_for('payments.index') }}" class="row g-2 align-items-center">
-                    <!-- Búsqueda por texto -->
-                    <div class="col-12 col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                            <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Jugador, Cédula o Recibo...">
+    /* Tarjetas de Filtros Translúcidas */
+    .filter-glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 0.95rem 1.1rem;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .filter-card-header {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 0.65rem;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .filter-input-control {
+        background-color: #ffffff;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 0.48rem 0.75rem;
+        font-size: 0.84rem;
+        color: #1e293b;
+    }
+    .filter-input-control:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        outline: none;
+    }
+
+    /* Tarjeta Total Recaudado */
+    .kpi-revenue-card {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        border-radius: 18px;
+        color: #ffffff;
+        padding: 1.1rem 1.4rem;
+        box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ball-orb-3d {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 55%, #0284c7 100%);
+        box-shadow: inset -2px -2px 6px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.25);
+        position: absolute;
+        right: 1.25rem;
+        top: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .btn-register-green-pill {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        border: none;
+        border-radius: 14px;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.92rem;
+        padding: 0.65rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
+        margin-top: 0.65rem;
+        transition: transform 0.15s ease;
+    }
+    .btn-register-green-pill:hover {
+        transform: translateY(-1px);
+        color: #ffffff;
+        box-shadow: 0 6px 18px rgba(22, 163, 74, 0.4);
+    }
+
+    /* Filas Flotantes de Pagos */
+    .payment-row-card {
+        background: #ffffff;
+        border: 1px solid #edf2f7;
+        border-radius: 16px;
+        padding: 0.85rem 1.25rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        margin-bottom: 0.75rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .payment-row-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+        border-color: #e2e8f0;
+    }
+
+    /* Badge Recibo */
+    .badge-receipt-tag {
+        background-color: #0284c7;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        padding: 0.35rem 0.65rem;
+        display: inline-block;
+    }
+
+    .player-mini-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background-color: #e0f2fe;
+        color: #0369a1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+        border: 1px solid #bae6fd;
+        flex-shrink: 0;
+    }
+
+    .badge-status-pill {
+        border-radius: 20px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        padding: 0.35rem 0.8rem;
+        color: #ffffff;
+    }
+    .badge-status-completed {
+        background-color: #10b981;
+    }
+    .badge-status-pending {
+        background-color: #f59e0b;
+    }
+
+    /* Botones de acción */
+    .action-icon-pill {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        transition: all 0.15s ease;
+        text-decoration: none;
+    }
+    .action-icon-pill:hover {
+        background-color: #e2e8f0;
+        color: #0f172a;
+    }
+</style>
+
+<div class="container-fluid px-0">
+
+    <!-- Encabezado Principal -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <span class="fs-2">💵</span>
+            <div>
+                <h3 class="fw-bold mb-0 text-dark">Control de Pagos y Mensualidades</h3>
+                <p class="text-muted mb-0 small">Registro contable, mensualidades y emisión de comprobantes</p>
+            </div>
+        </div>
+
+        <a href="{{ url_for('payments.create') }}" class="btn-quick-create d-flex align-items-center gap-2">
+            <i class="bi bi-plus-circle"></i> Registrar Cobro
+        </a>
+    </div>
+
+    <!-- Bloque Superior de Filtros y KPI -->
+    <form method="GET" action="{{ url_for('payments.index') }}" class="mb-4">
+        <div class="row g-3">
+            
+            <!-- 1. Columna Búsqueda Rápida -->
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="filter-glass-card mb-2">
+                    <div class="filter-card-header">
+                        <i class="bi bi-search text-primary"></i> Búsqueda Rápida
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted" style="border: 1.5px solid #cbd5e1; border-right: none; border-radius: 10px 0 0 10px;">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="q" value="{{ q or '' }}" class="form-control filter-input-control border-start-0" style="border-radius: 0 10px 10px 0;" placeholder="Jugador, Cédula o Recibo...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Columna Concepto y Estado -->
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="filter-glass-card">
+                    <div class="filter-card-header">
+                        <i class="bi bi-tag text-info"></i> Concepto y Estado
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <select name="concept" class="form-select filter-input-control">
+                                <option value="">Todos los conceptos</option>
+                                <option value="Mensualidad" {% if selected_concept == 'Mensualidad' %}selected{% endif %}>Mensualidad</option>
+                                <option value="Matrícula" {% if selected_concept == 'Matrícula' %}selected{% endif %}>Matrícula</option>
+                                <option value="Uniforme" {% if selected_concept == 'Uniforme' %}selected{% endif %}>Uniforme</option>
+                                <option value="Torneo / Inscripción" {% if selected_concept == 'Torneo / Inscripción' %}selected{% endif %}>Torneo</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <select name="status" class="form-select filter-input-control">
+                                <option value="">Todos los estados</option>
+                                <option value="Completado" {% if selected_status == 'Completado' %}selected{% endif %}>Completado</option>
+                                <option value="Pendiente" {% if selected_status == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <select class="form-select filter-input-control text-muted" style="background-color: #f8fafc;" disabled>
+                            <option>Todos los estados</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Columna Rango de Fechas Principal -->
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="filter-glass-card">
+                    <div>
+                        <div class="filter-card-header">
+                            <i class="bi bi-calendar3 text-primary"></i> Rango de Fechas
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <input type="date" name="date_from" value="{{ date_from or '' }}" class="form-control filter-input-control" title="Desde">
+                            </div>
+                            <div class="col-6">
+                                <input type="date" name="date_to" value="{{ date_to or '' }}" class="form-control filter-input-control" title="Hasta">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Concepto -->
-                    <div class="col-6 col-md-2">
-                        <select name="concept" class="form-select">
-                            <option value="">Todos los conceptos</option>
-                            <option value="Mensualidad" {% if selected_concept == 'Mensualidad' %}selected{% endif %}>Mensualidad</option>
-                            <option value="Matrícula" {% if selected_concept == 'Matrícula' %}selected{% endif %}>Matrícula</option>
-                            <option value="Uniforme" {% if selected_concept == 'Uniforme' %}selected{% endif %}>Uniforme</option>
-                            <option value="Torneo / Inscripción" {% if selected_concept == 'Torneo / Inscripción' %}selected{% endif %}>Torneo</option>
-                        </select>
-                    </div>
-
-                    <!-- Estado -->
-                    <div class="col-6 col-md-2">
-                        <select name="status" class="form-select">
-                            <option value="">Todos los estados</option>
-                            <option value="Completado" {% if selected_status == 'Completado' %}selected{% endif %}>Completado</option>
-                            <option value="Pendiente" {% if selected_status == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-                        </select>
-                    </div>
-
-                    <!-- Rango de Fechas -->
-                    <div class="col-6 col-md-2">
-                        <input type="date" name="date_from" value="{{ date_from }}" class="form-control" title="Fecha Desde">
-                    </div>
-                    <div class="col-6 col-md-2">
-                        <input type="date" name="date_to" value="{{ date_to }}" class="form-control" title="Fecha Hasta">
-                    </div>
-
-                    <!-- Botones de Acción -->
-                    <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                        <a href="{{ url_for('payments.index') }}" class="btn btn-outline-secondary btn-sm" title="Limpiar Filtros">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i> Limpiar
+                    <!-- Botones de Acción de Filtro -->
+                    <div class="d-flex justify-content-end gap-2 pt-1">
+                        <a href="{{ url_for('payments.index') }}" class="btn btn-outline-secondary btn-sm px-3 rounded-3" title="Limpiar Filtros">
+                            <i class="bi bi-arrow-counterclockwise"></i> Limpiar
                         </a>
-                        <button type="submit" class="btn btn-secondary btn-sm px-3">
+                        <button type="submit" class="btn btn-dark btn-sm px-3 rounded-3 fw-semibold">
                             <i class="bi bi-funnel-fill me-1"></i> Aplicar Filtros
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
+
+            <!-- 4. Columna KPI Total Recaudado y Botón Registrar Cobro -->
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="kpi-revenue-card">
+                    <span class="small opacity-80 fw-semibold text-uppercase">Total Recaudado</span>
+                    <h2 class="display-6 fw-bold my-1">${{ "%.2f"|format(total_recaudado or 0) }}</h2>
+                    <small class="opacity-75 d-block">Suma según filtros activos</small>
+                    <div class="ball-orb-3d">
+                        ⚽
+                    </div>
+                </div>
+                <a href="{{ url_for('payments.create') }}" class="btn-register-green-pill">
+                    <i class="bi bi-cash-coin fs-5"></i> Registrar Cobro
+                </a>
+            </div>
+
         </div>
+    </form>
+
+    <!-- Encabezados de Columna -->
+    <div class="row px-3 mb-2 text-muted fw-bold small">
+        <div class="col-12 col-md-1">Nº Recibo</div>
+        <div class="col-6 col-md-1">Fecha</div>
+        <div class="col-12 col-md-3">Jugador</div>
+        <div class="col-6 col-md-2">Concepto</div>
+        <div class="col-6 col-md-1">Método</div>
+        <div class="col-4 col-md-1">Monto</div>
+        <div class="col-4 col-md-1">Estado</div>
+        <div class="col-4 col-md-2 text-end pe-3">Acciones</div>
     </div>
 
-    <!-- Tarjeta Total -->
-    <div class="col-12 col-xl-3">
-        <div class="card border-0 shadow-sm bg-primary text-white h-100 d-flex justify-content-center">
-            <div class="card-body py-3">
-                <h6 class="text-white-50 mb-1">Total Recaudado</h6>
-                <h3 class="fw-bold mb-0">${{ "%.2f"|format(total_recaudado) }}</h3>
-                <small class="text-white-50 d-block mt-1">Suma según filtros activos</small>
+    <!-- Lista de Pagos en Filas Flotantes -->
+    {% for p in payments %}
+    <div class="payment-row-card">
+        <div class="row align-items-center">
+            
+            <!-- Nº Recibo -->
+            <div class="col-12 col-md-1 mb-2 mb-md-0">
+                <span class="badge-receipt-tag">{{ p.receipt_number }}</span>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Tabla de Cobros -->
-<div class="card border-0 shadow-sm rounded-3">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Nº Recibo</th>
-                    <th>Fecha</th>
-                    <th>Jugador</th>
-                    <th>Concepto</th>
-                    <th>Método</th>
-                    <th>Monto</th>
-                    <th>Estado</th>
-                    <th class="text-end">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in payments %}
-                <tr>
-                    <td class="fw-bold text-primary">{{ p.receipt_number }}</td>
-                    <td>{{ p.payment_date.strftime('%d/%m/%Y') }}</td>
-                    <td>
-                        <div class="fw-semibold">{{ p.player_name }}</div>
-                        <small class="text-muted">Rep: {{ p.representative_name }}</small>
-                    </td>
-                    <td>
-                        <span class="badge bg-light text-dark border">{{ p.concept }}</span>
-                        {% if p.month_covered %}<small class="d-block text-muted">{{ p.month_covered }}</small>{% endif %}
-                    </td>
-                    <td>{{ p.payment_method }}</td>
-                    <td class="fw-bold">${{ "%.2f"|format(p.amount) }}</td>
-                    <td>
-                        <span class="badge bg-{{ 'success' if p.status == 'Completado' else 'warning text-dark' }}">
-                            {{ p.status }}
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <div class="d-inline-flex gap-1">
-                            {% if p.status == 'Pendiente' %}
-                            <form action="{{ url_for('payments.mark_completed', payment_id=p._id) }}" method="POST" onsubmit="return confirm('¿Confirmar que este pago fue completado?');" class="m-0">
-                                <button type="submit" class="btn btn-sm btn-success" title="Marcar como Pagado">
-                                    <i class="bi bi-check-circle me-1"></i> Confirmar
-                                </button>
-                            </form>
-                            {% endif %}
-                            <a href="{{ url_for('payments.receipt', payment_id=p._id) }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Imprimir Recibo">
-                                <i class="bi bi-printer"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
+            <!-- Fecha -->
+            <div class="col-6 col-md-1 mb-2 mb-md-0 small text-dark fw-semibold">
+                {{ p.payment_date.strftime('%d/%m/%Y') if p.payment_date else '' }}
+                <i class="bi bi-calendar3 text-muted ms-1"></i>
+            </div>
+
+            <!-- Jugador y Representante -->
+            <div class="col-12 col-md-3 mb-2 mb-md-0">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="player-mini-avatar">
+                        {{ (p.player_name[0] if p.player_name else 'J') }}
+                    </div>
+                    <div>
+                        <span class="fw-bold text-dark d-block">{{ p.player_name }}</span>
+                        <small class="text-muted">Rep: {{ p.representative_name or 'No especificado' }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Concepto / Mes -->
+            <div class="col-6 col-md-2 mb-2 mb-md-0 small">
+                <div class="d-flex align-items-center gap-1 text-dark fw-medium">
+                    <i class="bi bi-credit-card text-secondary"></i>
+                    <span>{{ p.concept }}</span>
+                </div>
+                {% if p.month_covered %}
+                    <small class="text-muted ps-3">{{ p.month_covered }}</small>
+                {% endif %}
+            </div>
+
+            <!-- Método de Pago -->
+            <div class="col-6 col-md-1 mb-2 mb-md-0 small text-muted">
+                <i class="bi bi-cash-stack text-success me-1"></i> {{ p.payment_method }}
+            </div>
+
+            <!-- Monto -->
+            <div class="col-4 col-md-1 mb-2 mb-md-0 fw-bold text-dark">
+                ${{ "%.2f"|format(p.amount) }}
+            </div>
+
+            <!-- Estado -->
+            <div class="col-4 col-md-1 mb-2 mb-md-0">
+                {% if p.status == 'Completado' %}
+                    <span class="badge-status-pill badge-status-completed">Completado</span>
                 {% else %}
-                <tr>
-                    <td colspan="8" class="text-center py-4 text-muted">No se registran pagos con los filtros seleccionados.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    <span class="badge-status-pill badge-status-pending">Pendiente</span>
+                {% endif %}
+            </div>
+
+            <!-- Acciones -->
+            <div class="col-4 col-md-2 text-end pe-3">
+                <div class="d-inline-flex gap-1 align-items-center">
+                    {% if p.status == 'Pendiente' %}
+                    <form action="{{ url_for('payments.mark_completed', payment_id=p._id) }}" method="POST" onsubmit="return confirm('¿Confirmar que este pago fue completado?');" class="m-0">
+                        <button type="submit" class="action-icon-pill text-success" title="Confirmar Pago">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <a href="{{ url_for('payments.receipt', payment_id=p._id) }}" target="_blank" class="action-icon-pill" title="Imprimir Comprobante">
+                        <i class="bi bi-printer"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
     </div>
+    {% else %}
+    <div class="text-center py-5 text-muted bg-white rounded-4 border">
+        <i class="bi bi-receipt-cutoff fs-1 opacity-50 d-block mb-2"></i>
+        No se registran pagos con los filtros seleccionados.
+    </div>
+    {% endfor %}
+
 </div>
 {% endblock %}

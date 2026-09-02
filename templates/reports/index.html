@@ -1,57 +1,237 @@
 {% extends 'base.html' %}
 
-{% block title %}Reportes y Métricas - Escuela De Futbol Xavier Murillo{% endblock %}
+{% block title %}Reportes y Estadísticas - Escuela De Fútbol Xavier Murillo{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold mb-0">📊 Reportes y Estadísticas</h3>
-        <p class="text-muted mb-0">Consolidado financiero y distribución operativa</p>
-    </div>
-    <a href="{{ url_for('reports.export_payments_csv') }}" class="btn btn-outline-success">
-        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportar Pagos a CSV / Excel
-    </a>
-</div>
+<style>
+    /* 3 Tarjetas Métricas Superiores */
+    .kpi-report-card {
+        border-radius: 18px;
+        padding: 1.25rem 1.6rem;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-<!-- Métricas Destacadas -->
-<div class="row g-3 mb-4">
-    <div class="col-12 col-md-4">
-        <div class="card border-0 shadow-sm bg-success text-white">
-            <div class="card-body">
-                <h6 class="text-white-50 mb-1">Recaudación Total Efectiva</h6>
-                <h3 class="fw-bold mb-0">${{ "%.2f"|format(total_ingresos) }}</h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-md-4">
-        <div class="card border-0 shadow-sm bg-warning text-dark">
-            <div class="card-body">
-                <h6 class="text-muted mb-1">Pagos por Confirmar</h6>
-                <h3 class="fw-bold mb-0">{{ total_cobros_pendientes }}</h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-md-4">
-        <div class="card border-0 shadow-sm bg-dark text-white">
-            <div class="card-body">
-                <h6 class="text-white-50 mb-1">Total Sesiones Programadas</h6>
-                <h3 class="fw-bold mb-0">{{ total_entrenamientos }}</h3>
-            </div>
-        </div>
-    </div>
-</div>
+    .kpi-emerald {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        box-shadow: 0 10px 24px rgba(5, 150, 105, 0.3);
+    }
+    .kpi-amber {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        box-shadow: 0 10px 24px rgba(245, 158, 11, 0.3);
+    }
+    .kpi-dark-slate {
+        background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+        box-shadow: 0 10px 24px rgba(30, 41, 59, 0.35);
+    }
 
-<div class="row g-4">
-    <!-- Ingresos por Concepto -->
-    <div class="col-12 col-lg-6">
-        <div class="card border-0 shadow-sm rounded-3 h-100">
-            <div class="card-header bg-white border-0 pt-3">
-                <h5 class="fw-bold mb-0">💵 Ingresos por Concepto</h5>
+    /* Esfera / Gema 3D en las tarjetas métricas */
+    .kpi-sphere-orb {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1) 60%, rgba(0, 0, 0, 0.25) 100%);
+        box-shadow: inset -2px -2px 6px rgba(0,0,0,0.3), 0 4px 10px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.92;
+    }
+
+    /* Paneles de Contenido Inferiores */
+    .report-panel-card {
+        background: #ffffff;
+        border: 1px solid #edf2f7;
+        border-radius: 20px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
+        padding: 1.5rem 1.6rem;
+        height: 100%;
+    }
+
+    .panel-header-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #1e293b;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Tabla de Conceptos */
+    .concepts-table th {
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-bottom: 1.5px solid #e2e8f0;
+        padding-bottom: 0.75rem;
+    }
+    .concepts-table td {
+        padding: 0.9rem 0.6rem;
+        font-size: 0.9rem;
+        color: #1e293b;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* Barras de Progreso por Categoría */
+    .category-stat-row {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        margin-bottom: 0.95rem;
+    }
+
+    .cat-pill-badge {
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #334155;
+        min-width: 85px;
+        text-align: center;
+    }
+
+    .progress-bar-container {
+        flex-grow: 1;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        height: 28px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        padding-left: 8px;
+        transition: width 0.4s ease;
+    }
+
+    .progress-fill-blue {
+        background: linear-gradient(90deg, #38bdf8 0%, #3b82f6 60%, #1d4ed8 100%);
+    }
+
+    .progress-fill-orange {
+        background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 60%, #d97706 100%);
+    }
+
+    .counter-circle-end {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #3b82f6;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.82rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .btn-export-reports {
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        border: 1.5px solid #cbd5e1;
+        border-radius: 12px;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.5rem 1.15rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .btn-export-reports:hover {
+        background: #f8fafc;
+        color: #0f172a;
+    }
+</style>
+
+<div class="container-fluid px-0">
+
+    <!-- Encabezado Principal -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <span class="fs-2">📊</span>
+            <div>
+                <h3 class="fw-bold mb-0 text-dark">Reportes y Estadísticas</h3>
+                <p class="text-muted mb-0 small">Consolidado financiero y distribución operativa</p>
             </div>
-            <div class="card-body">
+        </div>
+
+        <a href="{{ url_for('reports.export_payments_csv') }}" class="btn-export-reports d-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark-spreadsheet text-success"></i> Exportar CSV / Excel
+        </a>
+    </div>
+
+    <!-- 3 Tarjetas Métricas Superiores -->
+    <div class="row g-3 mb-4">
+        <!-- Recaudación Total Efectiva -->
+        <div class="col-12 col-md-4">
+            <div class="kpi-report-card kpi-emerald">
+                <div>
+                    <span class="small opacity-80 fw-semibold text-uppercase">Recaudación Total Efectiva</span>
+                    <h2 class="display-6 fw-bold my-1">${{ "%.2f"|format(total_ingresos or 0) }}</h2>
+                </div>
+                <div class="kpi-sphere-orb">
+                    <span style="font-size: 1.2rem;">🟢</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagos por Confirmar -->
+        <div class="col-12 col-md-4">
+            <div class="kpi-report-card kpi-amber">
+                <div>
+                    <span class="small opacity-80 fw-semibold text-uppercase">Pagos por Confirmar</span>
+                    <h2 class="display-6 fw-bold my-1">{{ total_cobros_pendientes or 0 }}</h2>
+                </div>
+                <div class="kpi-sphere-orb">
+                    <span style="font-size: 1.2rem;">🟡</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Sesiones Programadas -->
+        <div class="col-12 col-md-4">
+            <div class="kpi-report-card kpi-dark-slate">
+                <div>
+                    <span class="small opacity-80 fw-semibold text-uppercase">Total Sesiones Programadas</span>
+                    <h2 class="display-6 fw-bold my-1">{{ total_entrenamientos or 0 }}</h2>
+                </div>
+                <div class="kpi-sphere-orb">
+                    <i class="bi bi-stopwatch text-white fs-5"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bloques Inferiores: Ingresos por Concepto & Alumnos por Categoría -->
+    <div class="row g-4">
+
+        <!-- Columna Izquierda: Ingresos por Concepto -->
+        <div class="col-12 col-lg-6">
+            <div class="report-panel-card">
+                <div class="panel-header-title">
+                    <i class="bi bi-cash-stack text-success"></i> Ingresos por Concepto
+                </div>
+
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+                    <table class="table concepts-table align-middle mb-0">
+                        <thead>
                             <tr>
                                 <th>Concepto</th>
                                 <th class="text-center">Transacciones</th>
@@ -60,44 +240,18 @@
                         </thead>
                         <tbody>
                             {% for item in payments_by_concept %}
+                            {% set c_count = item.count if item.count is defined else item['count'] %}
+                            {% set c_total = item.total if item.total is defined else item['total'] %}
+                            {% set c_id = item._id if item._id is defined else item['_id'] %}
                             <tr>
-                                <td class="fw-semibold">{{ item._id }}</td>
-                                <td class="text-center">{{ item.count }}</td>
-                                <td class="text-end fw-bold text-success">${{ "%.2f"|format(item.total) }}</td>
+                                <td class="fw-semibold text-dark">{{ c_id or 'General' }}</td>
+                                <td class="text-center text-muted">{{ c_count or 0 }}</td>
+                                <td class="text-end fw-bold text-dark">${{ "%.2f"|format(c_total or 0) }}</td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="3" class="text-center py-3 text-muted">No se registran cobros completados aún.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alumnos por Categoría -->
-    <div class="col-12 col-lg-6">
-        <div class="card border-0 shadow-sm rounded-3 h-100">
-            <div class="card-header bg-white border-0 pt-3">
-                <h5 class="fw-bold mb-0">⚽ Alumnos Activos por Categoría</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Categoría</th>
-                                <th class="text-end">Cantidad de Alumnos</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cat in cat_counts %}
-                            <tr>
-                                <td class="fw-semibold">{{ cat.name }}</td>
-                                <td class="text-end">
-                                    <span class="badge bg-primary fs-6">{{ cat.count }}</span>
+                                <td colspan="3" class="text-center py-4 text-muted">
+                                    No se registran cobros completados aún.
                                 </td>
                             </tr>
                             {% endfor %}
@@ -106,6 +260,62 @@
                 </div>
             </div>
         </div>
+
+        <!-- Columna Derecha: Alumnos Activos por Categoría -->
+        <div class="col-12 col-lg-6">
+            <div class="report-panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="panel-header-title mb-0">
+                        <i class="bi bi-pie-chart text-primary"></i> Alumnos Activos por Categoría
+                    </div>
+                    <span class="small text-muted fw-semibold">Cantidad de Alumnos</span>
+                </div>
+
+                <!-- Cálculo seguro de valor máximo (evita error de atributo y división por 0) -->
+                {% set max_students = namespace(val=1) %}
+                {% for c in cat_counts %}
+                    {% set student_count = c['count'] if (c is mapping and 'count' in c) else (c.count if c.count is defined else 0) %}
+                    {% if student_count > max_students.val %}
+                        {% set max_students.val = student_count %}
+                    {% endif %}
+                {% endfor %}
+
+                <div class="d-flex flex-column pt-2">
+                    {% for cat in cat_counts %}
+                    {% set current_count = cat['count'] if (cat is mapping and 'count' in cat) else (cat.count if cat.count is defined else 0) %}
+                    {% set current_name = cat['name'] if (cat is mapping and 'name' in cat) else (cat.name if cat.name is defined else 'General') %}
+                    
+                    <div class="category-stat-row">
+                        <!-- Insignia Categoría -->
+                        <span class="cat-pill-badge">{{ current_name }}</span>
+
+                        <!-- Barra de Progreso Dinámica con Avatares -->
+                        <div class="progress-bar-container">
+                            {% set pct = (current_count / max_students.val * 100) if max_students.val > 0 else 0 %}
+                            {% set bar_width = [pct, 100]|min %}
+                            {% set bar_color = 'progress-fill-orange' if loop.index % 2 == 0 else 'progress-fill-blue' %}
+                            {% if pct > 0 %}
+                            <div class="progress-bar-fill {{ bar_color }}" {{ ('style="width: ' ~ bar_width ~ '%;"')|safe }}>
+                                <span class="text-white small me-1" style="font-size: 0.75rem;">👦</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contador en Círculo Azul -->
+                        <div class="counter-circle-end">
+                            {{ current_count }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        No hay alumnos registrados en las categorías.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
     </div>
+
 </div>
 {% endblock %}

@@ -12,7 +12,41 @@ users_bp = Blueprint('users', __name__, url_prefix='/users')
 @role_required(['Administrador'])
 def index():
     users = list(db.users.find().sort('full_name', 1)) if db is not None else []
-    return render_template('users/index.html', users=users)
+    
+    total_users = len(users)
+    active_count = sum(1 for u in users if u.get('is_active', True))
+    inactive_count = total_users - active_count
+
+    # Distribución por Rol para el widget analítico
+    role_counts = {
+        'Administrador': sum(1 for u in users if u.get('role') == 'Administrador'),
+        'Entrenador': sum(1 for u in users if u.get('role') == 'Entrenador'),
+        'Representante': sum(1 for u in users if u.get('role') not in ['Administrador', 'Entrenador'])
+    }
+
+    # Porcentajes calculados para el gráfico de dona
+    if total_users > 0:
+        admin_pct = round((role_counts['Administrador'] / total_users) * 100)
+        coach_pct = round((role_counts['Entrenador'] / total_users) * 100)
+        rep_pct = max(0, 100 - admin_pct - coach_pct)
+    else:
+        admin_pct, coach_pct, rep_pct = 0, 0, 0
+
+    role_stats = {
+        'admin_pct': admin_pct,
+        'coach_pct': coach_pct,
+        'rep_pct': rep_pct,
+        'counts': role_counts
+    }
+
+    return render_template(
+        'users/index.html',
+        users=users,
+        total_users=total_users,
+        active_count=active_count,
+        inactive_count=inactive_count,
+        role_stats=role_stats
+    )
 
 @users_bp.route('/create', methods=['GET', 'POST'])
 @login_required

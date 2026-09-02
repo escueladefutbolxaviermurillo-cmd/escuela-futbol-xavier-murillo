@@ -1,48 +1,252 @@
 {% extends 'base.html' %}
 
-{% block title %}Crear Usuario - Escuela FC{% endblock %}
+{% block title %}Registrar Usuario - Escuela De Fútbol Xavier Murillo{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-12 col-md-6">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold mb-0">👤 Registrar Usuario</h3>
-            <a href="{{ url_for('users.index') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
+<style>
+    /* Contenedor tipo tarjeta flotante */
+    .user-create-card {
+        background: #ffffff;
+        border: 1px solid #edf2f7;
+        border-radius: 22px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        padding: 2.2rem;
+        max-width: 780px;
+        margin: 0 auto;
+    }
+
+    .form-col-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .user-form-label {
+        font-size: 0.86rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.35rem;
+        display: block;
+    }
+
+    /* Inputs estilo mockup */
+    .user-input-control {
+        background-color: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.65rem 0.95rem;
+        font-size: 0.9rem;
+        color: #1e293b;
+        transition: all 0.2s ease;
+    }
+    .user-input-control:focus {
+        background-color: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        outline: none;
+    }
+
+    /* Botón Crear Usuario */
+    .btn-submit-user {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 0.7rem 1.4rem;
+        font-weight: 600;
+        font-size: 0.92rem;
+        width: 100%;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-submit-user:hover {
+        transform: translateY(-1px);
+        color: #ffffff;
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+    }
+
+    /* Botón Cancelar */
+    .btn-cancel-user {
+        background-color: #ffffff;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 12px;
+        color: #475569;
+        font-weight: 600;
+        font-size: 0.92rem;
+        padding: 0.65rem 1.4rem;
+        width: 100%;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.15s ease;
+    }
+    .btn-cancel-user:hover {
+        background-color: #f8fafc;
+        color: #0f172a;
+    }
+
+    /* Botón Volver */
+    .btn-back-pill {
+        background-color: #ffffff;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 10px;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.45rem 1.1rem;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .btn-back-pill:hover {
+        background-color: #f8fafc;
+        color: #0f172a;
+    }
+
+    /* Widget At a glance */
+    .at-a-glance-wrap {
+        max-width: 780px;
+        margin: 1.75rem auto 0 auto;
+    }
+
+    .glance-pill-card {
+        background: #ffffff;
+        border: 1px solid #edf2f7;
+        border-radius: 14px;
+        padding: 0.75rem 1.1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+    }
+
+    .glance-icon-box {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+</style>
+
+<div class="container py-3">
+
+    <!-- Encabezado Superior -->
+    <div class="d-flex justify-content-between align-items-center mb-4" style="max-width: 780px; margin: 0 auto 1.5rem auto;">
+        <div class="d-flex align-items-center gap-2">
+            <span class="fs-4">👤</span>
+            <h3 class="fw-bold mb-0 text-dark">Registrar Usuario</h3>
         </div>
+        <a href="{{ url_for('users.index') }}" class="btn-back-pill">
+            Volver
+        </a>
+    </div>
 
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body p-4">
-                <form action="{{ url_for('users.create') }}" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Nombre Completo</label>
-                        <input type="text" name="full_name" class="form-control" placeholder="Ej. Profe Xavier Murillo" required>
+    <!-- Formulario Principal -->
+    <div class="user-create-card">
+        <form action="{{ url_for('users.create') }}" method="POST" id="createUserForm">
+
+            <div class="row g-4">
+                <!-- Columna Izquierda: Datos del Usuario -->
+                <div class="col-12 col-md-6">
+                    <div class="form-col-title">
+                        <i class="bi bi-person-badge text-primary"></i> Datos del Usuario
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Nombre de Usuario (Login)</label>
-                        <input type="text" name="username" class="form-control" placeholder="xavierm" required>
+                        <label class="user-form-label">Nombre Completo</label>
+                        <div class="input-group">
+                            <input type="text" name="full_name" class="form-control user-input-control border-end-0 rounded-start-3" placeholder="Ej. Profe Xavier Murillo" required>
+                            <span class="input-group-text bg-light border-start-0 text-muted rounded-end-3" style="border: 1.5px solid #e2e8f0; border-left: none;">
+                                <i class="bi bi-pencil"></i>
+                            </span>
+                        </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Rol en el Sistema</label>
-                        <select name="role" class="form-select" required>
-                            <option value="Entrenador" selected>Entrenador</option>
-                            <option value="Administrador">Administrador</option>
+                        <label class="user-form-label">Nombre de Usuario (Login)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted rounded-start-3" style="border: 1.5px solid #e2e8f0; border-right: none;">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="text" name="username" class="form-control user-input-control border-start-0 rounded-end-3" placeholder="admin" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="user-form-label">Rol en el Sistema</label>
+                        <select name="role" class="form-select user-input-control" required>
+                            <option value="Entrenador" selected>🧢 Entrenador</option>
+                            <option value="Administrador">🧑‍💼 Administrador</option>
                         </select>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Contraseña Inicial</label>
-                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                <!-- Columna Derecha: Seguridad y Acceso -->
+                <div class="col-12 col-md-6 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="form-col-title">
+                            <i class="bi bi-key text-warning"></i> Seguridad y Acceso
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="user-form-label">Contraseña Inicial</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="passInput" class="form-control user-input-control border-end-0 rounded-start-3" placeholder="••••••••" required>
+                                <button type="button" class="input-group-text bg-light text-muted border-start-0 rounded-end-3" style="border: 1.5px solid #e2e8f0; border-left: none;" onclick="togglePass('passInput', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="user-form-label">Confirmar Contraseña</label>
+                            <input type="password" id="confirmPassInput" class="form-control user-input-control" placeholder="••••••••" required>
+                        </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ url_for('users.index') }}" class="btn btn-light border px-4">Cancelar</a>
-                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Crear Usuario</button>
+                    <!-- Botones de Acción -->
+                    <div class="d-flex flex-column gap-2 mt-2">
+                        <button type="submit" class="btn-submit-user">
+                            <i class="bi bi-person-plus-fill me-1"></i> Crear Usuario
+                        </button>
+                        <a href="{{ url_for('users.index') }}" class="btn-cancel-user">
+                            Cancelar
+                        </a>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
+
+        </form>
     </div>
+
 </div>
+
+<script>
+    function togglePass(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+
+    document.getElementById('createUserForm').addEventListener('submit', function(e) {
+        const pass = document.getElementById('passInput').value;
+        const confirm = document.getElementById('confirmPassInput').value;
+        if (pass !== confirm) {
+            e.preventDefault();
+            alert('Las contraseñas no coinciden. Por favor verifícalas antes de continuar.');
+        }
+    });
+</script>
 {% endblock %}

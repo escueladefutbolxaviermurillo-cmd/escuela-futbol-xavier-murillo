@@ -1,140 +1,255 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - Escuela De Futbol Xavier Murillo{% endblock %}
+{% block title %}Dashboard - Escuela De Fútbol Xavier Murillo{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="fw-bold mb-0">Panel de Control</h2>
-        <p class="text-muted mb-0">Resumen operativo de la escuela de fútbol</p>
-    </div>
-    <span class="badge bg-success px-3 py-2 fs-6"><i class="bi bi-shield-check me-1"></i>Sistema Activo</span>
-</div>
+<style>
+    /* Alerta de Bienvenida translúcida con bordes suaves */
+    .dashboard-welcome-alert {
+        background: linear-gradient(90deg, #dcfce7 0%, #bbf7d0 100%);
+        border: 1px solid #86efac;
+        color: #14532d;
+        border-radius: 16px;
+        font-weight: 500;
+    }
 
-<!-- Tarjetas de Métricas -->
-<div class="row g-3 mb-4">
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body d-flex align-items-center">
-                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle me-3">
-                    <i class="bi bi-people fs-3"></i>
+    /* Badge Sistema Activo */
+    .badge-status-pill {
+        background-color: #22c55e;
+        color: #ffffff;
+        border-radius: 50rem;
+        padding: 0.45rem 1.1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);
+    }
+
+    /* Tarjetas de Métricas con degradados y sombras de color */
+    .kpi-card {
+        border-radius: 20px;
+        padding: 1.4rem;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .kpi-blue {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        box-shadow: 0 12px 24px rgba(29, 78, 216, 0.28);
+    }
+    .kpi-green {
+        background: linear-gradient(135deg, #4ade80 0%, #15803d 100%);
+        box-shadow: 0 12px 24px rgba(21, 128, 61, 0.28);
+    }
+    .kpi-cyan {
+        background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+        box-shadow: 0 12px 24px rgba(2, 132, 199, 0.28);
+    }
+    .kpi-rose {
+        background: linear-gradient(135deg, #fb7185 0%, #be123c 100%);
+        box-shadow: 0 12px 24px rgba(190, 18, 60, 0.28);
+    }
+
+    .kpi-icon-bg {
+        position: absolute;
+        right: 18px;
+        bottom: 12px;
+        font-size: 3.2rem;
+        opacity: 0.42;
+    }
+
+    /* Accesos Rápidos estilizados */
+    .quick-link-item {
+        display: flex;
+        align-items: center;
+        padding: 0.85rem 1.1rem;
+        border-radius: 14px;
+        text-decoration: none;
+        color: #1e293b;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        margin-bottom: 0.8rem;
+    }
+    .quick-link-item:hover {
+        background-color: #f1f5f9;
+        transform: translateX(4px);
+        color: #0f172a;
+    }
+
+    .quick-link-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        margin-right: 1rem;
+        font-size: 1.15rem;
+    }
+</style>
+
+<div class="container-fluid px-0">
+
+    <!-- Mensaje de Bienvenida estilo Mockup -->
+    <div class="alert dashboard-welcome-alert alert-dismissible fade show d-flex justify-content-between align-items-center mb-4 py-2 px-3 shadow-sm" role="alert">
+        <div>
+            <i class="bi bi-shield-check me-2"></i>¡Bienvenido, {{ session.get('full_name', 'Administrador') }}!
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Encabezado del Dashboard -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h2 class="fw-bold mb-1 text-dark">Panel de Control</h2>
+            <p class="text-muted mb-0">Resumen operativo de la escuela de fútbol</p>
+        </div>
+        <div>
+            <span class="badge badge-status-pill">
+                <i class="bi bi-check-circle-fill me-1"></i> Sistema Activo
+            </span>
+        </div>
+    </div>
+
+    <!-- 4 Tarjetas de Métricas -->
+    <div class="row g-3 mb-4">
+        <!-- Jugadores Activos -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card kpi-blue">
+                <div class="position-relative z-1">
+                    <span class="small opacity-75 fw-semibold text-uppercase">Jugadores Activos</span>
+                    <h2 class="display-6 fw-bold my-1">{{ total_players or 0 }}</h2>
                 </div>
-                <div>
-                    <h6 class="text-muted mb-1">Jugadores Activos</h6>
-                    <h3 class="fw-bold mb-0">{{ total_players }}</h3>
+                <i class="bi bi-people-fill kpi-icon-bg"></i>
+            </div>
+        </div>
+
+        <!-- Entrenadores -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card kpi-green">
+                <div class="position-relative z-1">
+                    <span class="small opacity-75 fw-semibold text-uppercase">Entrenadores</span>
+                    <h2 class="display-6 fw-bold my-1">{{ total_trainers or 0 }}</h2>
+                </div>
+                <i class="bi bi-person-badge-fill kpi-icon-bg"></i>
+            </div>
+        </div>
+
+        <!-- Categorías -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card kpi-cyan">
+                <div class="position-relative z-1">
+                    <span class="small opacity-75 fw-semibold text-uppercase">Categorías</span>
+                    <h2 class="display-6 fw-bold my-1">{{ total_categories or 0 }}</h2>
+                </div>
+                <i class="bi bi-diagram-3-fill kpi-icon-bg"></i>
+            </div>
+        </div>
+
+        <!-- Pagos Pendientes -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card kpi-rose">
+                <div class="position-relative z-1">
+                    <span class="small opacity-75 fw-semibold text-uppercase">Pagos Pendientes</span>
+                    <h2 class="display-6 fw-bold my-1">{{ pending_payments or 0 }}</h2>
+                </div>
+                <i class="bi bi-cash-coin kpi-icon-bg"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Inferior: Próximos Entrenamientos y Accesos Rápidos -->
+    <div class="row g-4">
+        <!-- Bloque de Próximos Entrenamientos -->
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-calendar2-event text-primary me-2"></i>Próximos Entrenamientos
+                    </h5>
+                    <a href="{{ url_for('trainings.index') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Ver todos</a>
+                </div>
+
+                <div class="card-body p-0">
+                    {% if upcoming_trainings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 text-start">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Cancha</th>
+                                    <th>Duración</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for training in upcoming_trainings %}
+                                <tr>
+                                    <td>{{ training.scheduled_date.strftime('%Y-%m-%d %H:%M') if training.scheduled_date else 'Sin fecha' }}</td>
+                                    <td>{{ training.field or 'Cancha Principal' }}</td>
+                                    <td>90 min</td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('trainings.take_attendance', training_id=training._id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="bi bi-check2-square me-1"></i> Tomar Lista
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <!-- Estado vacío estilizado idéntico al mockup -->
+                    <div class="d-flex flex-column justify-content-center align-items-center py-5 text-center text-muted">
+                        <i class="bi bi-calendar-x display-4 text-secondary opacity-50 mb-2"></i>
+                        <p class="mb-0">No hay entrenamientos programados recientemente.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloque de Accesos Rápidos -->
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <h5 class="fw-bold mb-3 text-dark">
+                    <i class="bi bi-lightning-charge text-warning me-2"></i>Accesos Rápidos
+                </h5>
+
+                <div class="d-flex flex-column justify-content-center">
+                    <a href="{{ url_for('players.index') }}" class="quick-link-item">
+                        <div class="quick-link-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <span>Administrador Jugadores</span>
+                    </a>
+
+                    <a href="{{ url_for('trainings.create') }}" class="quick-link-item">
+                        <div class="quick-link-icon bg-success-subtle text-success">
+                            <i class="bi bi-stopwatch-fill"></i>
+                        </div>
+                        <span>Programar Entrenamiento</span>
+                    </a>
+
+                    {% if session.get('role') == 'Administrador' %}
+                    <a href="{{ url_for('payments.index') }}" class="quick-link-item">
+                        <div class="quick-link-icon bg-danger-subtle text-danger">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                        <span>Registrar Cobro</span>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body d-flex align-items-center">
-                <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle me-3">
-                    <i class="bi bi-person-badge fs-3"></i>
-                </div>
-                <div>
-                    <h6 class="text-muted mb-1">Entrenadores</h6>
-                    <h3 class="fw-bold mb-0">{{ total_trainers }}</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body d-flex align-items-center">
-                <div class="bg-info bg-opacity-10 text-info p-3 rounded-circle me-3">
-                    <i class="bi bi-diagram-3 fs-3"></i>
-                </div>
-                <div>
-                    <h6 class="text-muted mb-1">Categorías</h6>
-                    <h3 class="fw-bold mb-0">{{ total_categories }}</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-12 col-sm-6 col-lg-3">
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body d-flex align-items-center">
-                <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle me-3">
-                    <i class="bi bi-cash-coin fs-3"></i>
-                </div>
-                <div>
-                    <h6 class="text-muted mb-1">Pagos Pendientes</h6>
-                    <h3 class="fw-bold mb-0">{{ pending_payments }}</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Próximos Entrenamientos y Accesos Rápidos -->
-<div class="row g-4">
-    <div class="col-12 col-lg-8">
-        <div class="card border-0 shadow-sm rounded-3 h-100">
-            <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
-                <h5 class="fw-bold mb-0">⚽ Próximos Entrenamientos</h5>
-                <a href="{{ url_for('trainings.index') }}" class="btn btn-sm btn-outline-secondary">Ver todos</a>
-            </div>
-            <div class="card-body">
-                {% if upcoming_trainings %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Cancha</th>
-                                <th>Duración</th>
-                                <th class="text-end">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for training in upcoming_trainings %}
-                            <tr>
-                                <td>{{ training.scheduled_date.strftime('%Y-%m-%d %H:%M') if training.scheduled_date else 'Sin fecha' }}</td>
-                                <td>{{ training.field or 'Cancha Principal' }}</td>
-                                <td>90 min</td>
-                                <td class="text-end">
-                                    <a href="{{ url_for('trainings.take_attendance', training_id=training._id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-check2-square me-1"></i> Tomar Lista
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
-                    No hay entrenamientos programados recientemente.
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <div class="col-12 col-lg-4">
-        <div class="card border-0 shadow-sm rounded-3 h-100">
-            <div class="card-header bg-white border-0 pt-3 pb-0">
-                <h5 class="fw-bold mb-0">Accesos Rápidos</h5>
-            </div>
-            <div class="card-body d-flex flex-column gap-2">
-                <a href="{{ url_for('players.index') }}" class="btn btn-light text-start py-2 border">
-                    <i class="bi bi-person-lines-fill me-2 text-primary"></i> Administrar Jugadores
-                </a>
-                <a href="{{ url_for('trainings.create') }}" class="btn btn-light text-start py-2 border">
-                    <i class="bi bi-calendar-plus me-2 text-success"></i> Programar Entrenamiento
-                </a>
-                {% if session.get('role') == 'Administrador' %}
-                <a href="{{ url_for('payments.index') if 'payments' in config.get('BLUEPRINTS', []) else '#' }}" class="btn btn-light text-start py-2 border">
-                    <i class="bi bi-credit-card me-2 text-danger"></i> Registrar Cobro / Mensualidad
-                </a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
 </div>
 {% endblock %}

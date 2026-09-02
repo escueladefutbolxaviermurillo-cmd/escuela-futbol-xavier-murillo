@@ -1,95 +1,277 @@
 {% extends 'base.html' %}
 
-{% block title %}Registrar Jugador - Escuela FC{% endblock %}
+{% block title %}Nuevo Jugador - Escuela De Fútbol Xavier Murillo{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-12 col-lg-8">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold mb-0">⚽ Nuevo Jugador</h3>
-            <a href="{{ url_for('players.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left"></i> Volver a la lista
+<style>
+    /* Estructura y contenedor temático del mockup */
+    .register-card-wrapper {
+        background-color: #fbf7ee;
+        border: 2px solid #e8dec8;
+        border-radius: 26px;
+        box-shadow: 0 12px 32px rgba(110, 85, 37, 0.08);
+        padding: 2.2rem;
+        max-width: 980px;
+        margin: 0 auto;
+    }
+
+    .form-header-title {
+        font-weight: 700;
+        font-size: 1.15rem;
+        color: #2b251d;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .custom-label-theme {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #3f362b;
+        margin-bottom: 0.35rem;
+    }
+
+    .mockup-control {
+        background-color: #ffffff;
+        border: 1.5px solid #d8cbaf;
+        border-radius: 12px;
+        padding: 0.62rem 0.95rem;
+        font-size: 0.92rem;
+        color: #2d261e;
+        transition: all 0.2s ease;
+    }
+
+    .mockup-control:focus {
+        background-color: #ffffff;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+    }
+
+    .mockup-select-accent {
+        background-color: #e5d4b5;
+        border: 1.5px solid #c9b48c;
+        font-weight: 500;
+        color: #2b251d;
+    }
+
+    /* Pizarra táctica central */
+    .tactical-board-card {
+        background: #347a46;
+        border: 3px solid #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        padding: 8px;
+        position: relative;
+        height: 185px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .tactical-board-card::before {
+        content: '';
+        position: absolute;
+        width: 82%;
+        height: 90%;
+        border: 1.5px solid rgba(255, 255, 255, 0.75);
+        border-radius: 8px;
+    }
+
+    .tactical-board-card::after {
+        content: '';
+        position: absolute;
+        width: 46px;
+        height: 46px;
+        border: 1.5px solid rgba(255, 255, 255, 0.75);
+        border-radius: 50%;
+    }
+
+    .player-pin-marker {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid white;
+        position: absolute;
+        z-index: 2;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.35);
+    }
+
+    /* Botón Guardar Carmin */
+    .btn-save-mockup {
+        background: linear-gradient(135deg, #a82e2e, #801818);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.62rem 2.2rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(168, 46, 46, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-save-mockup:hover {
+        transform: translateY(-1px);
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(168, 46, 46, 0.45);
+    }
+
+    .btn-save-mockup:active {
+        transform: translateY(0);
+    }
+
+    .btn-back-link {
+        background-color: #eae1cd;
+        border: 1.5px solid #d4c4a5;
+        border-radius: 12px;
+        color: #4a3d2c;
+        font-weight: 600;
+        padding: 0.5rem 1.1rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .btn-back-link:hover {
+        background-color: #dfd3b9;
+        color: #2d2315;
+    }
+</style>
+
+<div class="container py-3">
+    <div class="register-card-wrapper">
+
+        <!-- Barra Superior: Título y Volver -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fs-4">⚽</span>
+                <h3 class="fw-bold mb-0 text-dark">Nuevo Jugador</h3>
+            </div>
+            <a href="{{ url_for('players.index') }}" class="btn-back-link">
+                <i class="bi bi-arrow-left me-1"></i> Volver a lista
             </a>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body p-4">
-                <form action="{{ url_for('players.create') }}" method="POST">
-                    <!-- Datos del Alumno -->
-                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-person me-1"></i> Datos del Jugador</h5>
-                    <div class="row g-3 mb-4">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Nombres</label>
-                            <input type="text" name="first_name" class="form-control" placeholder="Ej. Carlos Andrés" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Apellidos</label>
-                            <input type="text" name="last_name" class="form-control" placeholder="Ej. Mendoza Vera" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Cédula / Identificación</label>
-                            <input type="text" name="identification_id" class="form-control" placeholder="0987654321" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Fecha de Nacimiento</label>
-                            <input type="date" name="birth_date" class="form-control" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Categoría Asignada</label>
-                            <select name="category_id" class="form-select" required>
-                                <option value="" disabled selected>Selecciona una categoría...</option>
-                                {% for cat in categories %}
-                                    <option value="{{ cat._id }}">{{ cat.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        
-                        <!-- Selección de Jornada -->
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Jornada de Entrenamiento</label>
-                            <select name="shift" class="form-select" required>
-                                <option value="" disabled selected>Selecciona la jornada...</option>
-                                <option value="Mañana">🌅 Mañana</option>
-                                <option value="Tarde">🌇 Tarde</option>
-                            </select>
-                        </div>
+        <form action="{{ url_for('players.create') }}" method="POST">
 
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Observaciones Médicas / Físicas</label>
-                            <input type="text" name="medical_notes" class="form-control" placeholder="Alergias, asma, etc. (Opcional)">
-                        </div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <!-- Datos del Representante -->
-                    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-person-badge me-1"></i> Datos del Representante</h5>
-                    <div class="row g-3 mb-4">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Nombre Completo</label>
-                            <input type="text" name="rep_name" class="form-control" placeholder="Ej. Juan Mendoza" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Cédula Representante</label>
-                            <input type="text" name="rep_id" class="form-control" placeholder="0912345678" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Teléfono / WhatsApp</label>
-                            <input type="tel" name="rep_phone" class="form-control" placeholder="+593 99..." required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Correo Electrónico</label>
-                            <input type="email" name="rep_email" class="form-control" placeholder="representante@email.com">
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ url_for('players.index') }}" class="btn btn-light border px-4">Cancelar</a>
-                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Guardar Jugador</button>
-                    </div>
-                </form>
+            <!-- Encabezado Sección Jugador -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="form-header-title">
+                    <i class="bi bi-person"></i> Datos del Jugador
+                </div>
+                <div class="rounded-circle bg-white border p-1 shadow-sm d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                    🧒
+                </div>
             </div>
-        </div>
+
+            <!-- Fila Principal con Pizarra Táctica en el Centro -->
+            <div class="row g-3 mb-3">
+                <!-- Columna Izquierda: Nombres, Cédula, Categoría -->
+                <div class="col-12 col-lg-5">
+                    <div class="mb-3">
+                        <label class="custom-label-theme">Nombres</label>
+                        <input type="text" name="first_name" class="form-control mockup-control" placeholder="Ej. Carlos Andrés" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="custom-label-theme">Cédula / Identificación</label>
+                        <input type="text" name="identification_id" class="form-control mockup-control" placeholder="0987654321" required>
+                    </div>
+
+                    <div>
+                        <label class="custom-label-theme">Categoría Asignada</label>
+                        <select name="category_id" class="form-select mockup-control mockup-select-accent" required>
+                            <option value="" disabled selected>Selecciona una categoría</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat._id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Columna Central: Pizarra Táctica Decorativa -->
+                <div class="col-12 col-lg-2 d-none d-lg-flex align-items-center justify-content-center">
+                    <div class="tactical-board-card w-100">
+                        <div class="player-pin-marker bg-danger" style="top: 20%; left: 22%;">8</div>
+                        <div class="player-pin-marker bg-primary" style="top: 36%; left: 45%;">4</div>
+                        <div class="player-pin-marker bg-success" style="top: 55%; left: 22%;">5</div>
+                        <div class="player-pin-marker bg-warning text-dark" style="top: 55%; left: 66%;">11</div>
+                        <div class="player-pin-marker bg-secondary" style="top: 74%; left: 45%;">1</div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Apellidos, Fecha Nacimiento, Jornada -->
+                <div class="col-12 col-lg-5">
+                    <div class="mb-3">
+                        <label class="custom-label-theme">Apellidos</label>
+                        <input type="text" name="last_name" class="form-control mockup-control" placeholder="Ej. Mendoza Vera" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="custom-label-theme">Fecha de Nacimiento</label>
+                        <input type="date" name="birth_date" class="form-control mockup-control" required>
+                    </div>
+
+                    <div>
+                        <label class="custom-label-theme">Jornada de Entrenamiento</label>
+                        <select name="shift" class="form-select mockup-control mockup-select-accent" required>
+                            <option value="" disabled selected>Selecciona la jornada...</option>
+                            <option value="Mañana">🌅 Mañana</option>
+                            <option value="Tarde">🌇 Tarde</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Observaciones Médicas -->
+                <div class="col-12 mt-2">
+                    <label class="custom-label-theme">Observaciones Médicas / Físicas</label>
+                    <input type="text" name="medical_notes" class="form-control mockup-control" placeholder="Alergias, asma, etc. (Opcional)">
+                </div>
+            </div>
+
+            <hr class="my-4" style="border-color: #d8cbaf;">
+
+            <!-- Encabezado Sección Representante -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="form-header-title">
+                    <i class="bi bi-person-vcard"></i> Datos del Representante
+                </div>
+                <div class="rounded-pill bg-white border px-3 py-1 text-muted small shadow-sm">
+                    <i class="bi bi-shield-lock me-1"></i> Cuenta de Acceso
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="custom-label-theme">Nombre Completo</label>
+                    <input type="text" name="rep_name" class="form-control mockup-control" placeholder="Ej. Juan Mendoza" required>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="custom-label-theme">Cédula Representante</label>
+                    <input type="text" name="rep_id" class="form-control mockup-control" placeholder="0912345678" required>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="custom-label-theme">Contacto / WhatsApp</label>
+                    <input type="tel" name="rep_phone" class="form-control mockup-control" placeholder="Ej. 0991234567" required>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="custom-label-theme">Correo Electrónico</label>
+                    <div class="d-flex gap-2">
+                        <input type="email" name="rep_email" class="form-control mockup-control" placeholder="representante@email.com">
+                        <button type="submit" class="btn-save-mockup flex-shrink-0">
+                            Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
     </div>
 </div>
 {% endblock %}

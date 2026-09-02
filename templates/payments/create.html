@@ -1,88 +1,384 @@
 {% extends 'base.html' %}
 
-{% block title %}Registrar Pago - Escuela FC{% endblock %}
+{% block title %}Registrar Nuevo Cobro - Escuela De Fútbol Xavier Murillo{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-12 col-md-8">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold mb-0">💵 Registrar Nuevo Cobro</h3>
-            <a href="{{ url_for('payments.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left"></i> Volver
-            </a>
+<style>
+    /* Tarjeta Principal estilo Tablero del Mockup */
+    .payment-create-card {
+        background-color: #fdfbf7;
+        border: 2px solid #e8dec8;
+        border-radius: 24px;
+        box-shadow: 0 12px 36px rgba(110, 85, 37, 0.07);
+        padding: 2.2rem;
+        max-width: 980px;
+        margin: 0 auto;
+    }
+
+    .form-group-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #2b251d;
+        margin-bottom: 1.1rem;
+    }
+
+    .field-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #3f362b;
+        margin-bottom: 0.35rem;
+        display: block;
+    }
+
+    /* Inputs y Selects */
+    .mock-control {
+        background-color: #ffffff;
+        border: 1.5px solid #d8cbaf;
+        border-radius: 12px;
+        padding: 0.62rem 0.95rem;
+        font-size: 0.9rem;
+        color: #2b251d;
+        transition: all 0.2s ease;
+    }
+    .mock-control:focus {
+        background-color: #ffffff;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+        outline: none;
+    }
+
+    /* Tarjetas de Selección Rápida de Conceptos */
+    .quick-concept-card {
+        background: #ffffff;
+        border: 1.5px solid #d8cbaf;
+        border-radius: 12px;
+        padding: 0.45rem 0.6rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        user-select: none;
+    }
+    .quick-concept-card:hover {
+        border-color: #10b981;
+        background-color: #f0fdf4;
+    }
+    .quick-concept-card.active {
+        border-color: #059669;
+        background-color: #e6f4ea;
+        box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
+    }
+    .quick-concept-icon {
+        font-size: 1.25rem;
+        display: block;
+        line-height: 1.2;
+    }
+    .quick-concept-text {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #334155;
+        margin-top: 2px;
+    }
+
+    /* Dropdown personalizado de Alumnos con buscador */
+    .custom-player-select-btn {
+        background-color: #ffffff;
+        border: 1.5px solid #d8cbaf;
+        border-radius: 12px;
+        padding: 0.62rem 0.95rem;
+        font-size: 0.9rem;
+        color: #2b251d;
+        width: 100%;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .player-dropdown-menu {
+        max-height: 260px;
+        overflow-y: auto;
+        border-radius: 14px;
+        border: 1.5px solid #d8cbaf;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+    }
+
+    .player-select-item {
+        border-radius: 8px;
+        padding: 0.45rem 0.65rem;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+    .player-select-item:hover {
+        background-color: #f1ebd9;
+    }
+
+    /* Botón Emitir Recibo */
+    .btn-emit-receipt {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        padding: 0.65rem 1.6rem;
+        font-weight: 600;
+        font-size: 0.92rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-emit-receipt:hover {
+        transform: translateY(-1px);
+        color: #ffffff;
+        box-shadow: 0 6px 18px rgba(5, 150, 105, 0.45);
+    }
+
+    .btn-cancel-tab {
+        background-color: #eae1cd;
+        border: 1.5px solid #d4c4a5;
+        border-radius: 12px;
+        color: #4a3d2c;
+        font-weight: 600;
+        font-size: 0.92rem;
+        padding: 0.65rem 1.6rem;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .btn-cancel-tab:hover {
+        background-color: #dfd3b9;
+        color: #2d2315;
+    }
+
+    /* Barra Inferior At a glance */
+    .at-glance-box {
+        background-color: #fdfbf7;
+        border: 1.5px solid #e8dec8;
+        border-radius: 16px;
+        padding: 0.75rem 1.4rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+        max-width: 580px;
+        margin: 1.75rem auto 0 auto;
+    }
+</style>
+
+<div class="container py-3">
+
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4" style="max-width: 980px; margin: 0 auto 1.25rem auto;">
+        <div class="d-flex align-items-center gap-2">
+            <span class="fs-4">💵</span>
+            <h3 class="fw-bold mb-0 text-dark">Registrar Nuevo Cobro</h3>
         </div>
-
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body p-4">
-                <form action="{{ url_for('payments.create') }}" method="POST">
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-7">
-                            <label class="form-label fw-semibold">Jugador</label>
-                            <select name="player_id" class="form-select" required>
-                                <option value="" disabled selected>Selecciona al alumno...</option>
-                                {% for pl in players %}
-                                    <option value="{{ pl._id }}">{{ pl.last_name }} {{ pl.first_name }} ({{ pl.identification_id }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-5">
-                            <label class="form-label fw-semibold">Concepto</label>
-                            <select name="concept" class="form-select" required>
-                                <option value="Mensualidad" selected>Mensualidad</option>
-                                <option value="Matrícula">Matrícula</option>
-                                <option value="Uniforme">Uniforme</option>
-                                <option value="Torneo / Inscripción">Torneo / Inscripción</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Monto ($ USD)</label>
-                            <input type="number" step="0.01" min="0.5" name="amount" class="form-control" placeholder="30.00" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Mes Correspondiente (Opcional)</label>
-                            <input type="text" name="month_covered" class="form-control" placeholder="Ej. Septiembre 2026">
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Método de Pago</label>
-                            <select name="payment_method" class="form-select">
-                                <option value="Efectivo" selected>Efectivo</option>
-                                <option value="Transferencia / Depósito">Transferencia / Depósito</option>
-                                <option value="Tarjeta de Débito/Crédito">Tarjeta de Débito/Crédito</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Nº Comprobante / Transacción</label>
-                            <input type="text" name="transaction_ref" class="form-control" placeholder="Ej. TRANS-849204 (opcional)">
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Estado del Pago</label>
-                            <select name="status" class="form-select">
-                                <option value="Completado" selected>Completado</option>
-                                <option value="Pendiente">Pendiente</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Notas / Observaciones</label>
-                            <input type="text" name="notes" class="form-control" placeholder="Detalle adicional">
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ url_for('payments.index') }}" class="btn btn-light border px-4">Cancelar</a>
-                        <button type="submit" class="btn btn-success px-4 fw-semibold">Emitir Recibo</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <a href="{{ url_for('payments.index') }}" class="btn-cancel-tab py-1 px-3 small">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
     </div>
+
+    <!-- Formulario Principal -->
+    <div class="payment-create-card">
+        <form action="{{ url_for('payments.create') }}" method="POST" id="paymentForm">
+
+            <!-- Fila Superior: Datos del Cobro & Detalles Económicos -->
+            <div class="row g-4 mb-4">
+                
+                <!-- Columna Izquierda: Datos del Cobro -->
+                <div class="col-12 col-lg-7 border-end-lg pe-lg-4" style="border-color: #e8dec8;">
+                    <div class="form-group-title">Datos del Cobro</div>
+
+                    <!-- Selector de Alumno con buscador interactivo -->
+                    <div class="mb-3 position-relative">
+                        <label class="field-label">Jugador</label>
+                        
+                        <!-- Input oculto para el envío del formulario -->
+                        <input type="hidden" name="player_id" id="selectedPlayerId" required>
+
+                        <!-- Botón selector -->
+                        <div class="dropdown">
+                            <button type="button" class="custom-player-select-btn" id="playerDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span id="selectedPlayerText" class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-secondary-subtle text-secondary rounded-circle p-1">👤</span>
+                                    <span>Seleccionar al alumno...</span>
+                                </span>
+                                <i class="bi bi-chevron-down text-muted small"></i>
+                            </button>
+
+                            <div class="dropdown-menu player-dropdown-menu w-100 shadow-sm" aria-labelledby="playerDropdownBtn">
+                                <div class="p-1 mb-2">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                        <input type="text" id="playerSearchInput" class="form-control border-start-0" placeholder="Buscar por nombre o cédula..." onkeyup="filterPlayerList()">
+                                    </div>
+                                </div>
+                                <div id="playerListContainer">
+                                    {% for pl in players %}
+                                    <div class="player-select-item" onclick="selectPlayer('{{ pl._id }}', '{{ pl.last_name }} {{ pl.first_name }}')">
+                                        <div class="rounded-circle bg-light border p-1 text-center" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                            👦
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold small text-dark player-item-name">{{ pl.last_name }} {{ pl.first_name }}</div>
+                                            <div class="text-muted" style="font-size: 0.72rem;">CI: {{ pl.identification_id }}</div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Concepto con Mini Tarjetas Rápidas -->
+                    <div class="mb-2">
+                        <label class="field-label">Concepto</label>
+                        <div class="row g-2 mb-2">
+                            <div class="col-4">
+                                <div class="quick-concept-card active" onclick="setConcept('Mensualidad', this)">
+                                    <span class="quick-concept-icon">💵</span>
+                                    <div class="quick-concept-text">Mensualidad</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="quick-concept-card" onclick="setConcept('Matrícula', this)">
+                                    <span class="quick-concept-icon">🧑‍🎓</span>
+                                    <div class="quick-concept-text">Inscripción</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="quick-concept-card" onclick="setConcept('Uniforme', this)">
+                                    <span class="quick-concept-icon">👕</span>
+                                    <div class="quick-concept-text">Materiales</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <select name="concept" id="mainConceptSelect" class="form-select mock-control" required>
+                            <option value="Mensualidad" selected>💵 Mensualidad</option>
+                            <option value="Matrícula">🧑‍🎓 Matrícula / Inscripción</option>
+                            <option value="Uniforme">👕 Uniforme / Materiales</option>
+                            <option value="Torneo / Inscripción">🏆 Torneo / Inscripción</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Detalles Económicos -->
+                <div class="col-12 col-lg-5 ps-lg-3">
+                    <div class="form-group-title">Detalles Económicos</div>
+
+                    <div class="mb-3">
+                        <label class="field-label">Monto ($ USD)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted fw-bold" style="border: 1.5px solid #d8cbaf; border-right: none; border-radius: 12px 0 0 12px;">$</span>
+                            <input type="number" step="0.01" min="0.5" name="amount" class="form-control mock-control border-start-0" style="border-radius: 0 12px 12px 0;" placeholder="30.00" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="field-label">Mes Correspondiente (Opcional)</label>
+                        <input type="text" name="month_covered" class="form-control mock-control" placeholder="Ej. Septiembre 2026" value="Septiembre 2026">
+                    </div>
+                </div>
+
+            </div>
+
+            <hr class="my-3" style="border-color: #e8dec8;">
+
+            <!-- Fila Inferior: Detalles Adicionales -->
+            <div class="mb-4">
+                <div class="form-group-title mb-3">Detalles Adicionales</div>
+                <div class="row g-3">
+                    <!-- Método de Pago -->
+                    <div class="col-12 col-md-3">
+                        <label class="field-label">Método de Pago</label>
+                        <select name="payment_method" class="form-select mock-control">
+                            <option value="Efectivo" selected>💵 Efectivo</option>
+                            <option value="Transferencia / Depósito">🏦 Transferencia / Depósito</option>
+                            <option value="Tarjeta de Débito/Crédito">💳 Tarjeta de Débito/Crédito</option>
+                        </select>
+                    </div>
+
+                    <!-- Nº Comprobante -->
+                    <div class="col-12 col-md-3">
+                        <label class="field-label">Nº Comprobante / Transacción</label>
+                        <input type="text" name="transaction_ref" class="form-control mock-control" placeholder="Ej. TRANS-849204 (opcional)">
+                    </div>
+
+                    <!-- Estado del Pago -->
+                    <div class="col-12 col-md-3">
+                        <label class="field-label">Estado del Pago</label>
+                        <select name="status" class="form-select mock-control">
+                            <option value="Completado" selected>🟢 Completado</option>
+                            <option value="Pendiente">🟡 Pendiente</option>
+                        </select>
+                    </div>
+
+                    <!-- Notas -->
+                    <div class="col-12 col-md-3">
+                        <label class="field-label">Notas / Observaciones</label>
+                        <input type="text" name="notes" class="form-control mock-control" placeholder="Detalle adicional">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción Finales -->
+            <div class="d-flex justify-content-end align-items-center gap-3 pt-2">
+                <a href="{{ url_for('payments.index') }}" class="btn-cancel-tab">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn-emit-receipt">
+                    <i class="bi bi-printer"></i> Emitir Recibo
+                </button>
+            </div>
+
+        </form>
+    </div>
+
 </div>
+
+<script>
+    // Selección de Alumno
+    function selectPlayer(id, name) {
+        document.getElementById('selectedPlayerId').value = id;
+        document.getElementById('selectedPlayerText').innerHTML = `
+            <span class="badge bg-primary rounded-circle p-1">👦</span>
+            <span class="fw-bold text-dark">${name}</span>
+        `;
+    }
+
+    // Filtro en tiempo real del buscador de alumnos
+    function filterPlayerList() {
+        const query = document.getElementById('playerSearchInput').value.toLowerCase();
+        const items = document.querySelectorAll('.player-select-item');
+        items.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = text.includes(query) ? 'flex' : 'none';
+        });
+    }
+
+    // Sincronización entre las tarjetas rápidas y el select principal
+    function setConcept(conceptVal, element) {
+        document.querySelectorAll('.quick-concept-card').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+        const select = document.getElementById('mainConceptSelect');
+        select.value = conceptVal;
+    }
+
+    document.getElementById('mainConceptSelect').addEventListener('change', function() {
+        const val = this.value;
+        document.querySelectorAll('.quick-concept-card').forEach(el => {
+            el.classList.toggle('active', el.innerText.includes(val.substring(0, 4)));
+        });
+    });
+
+    // Validación antes de enviar
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        const playerId = document.getElementById('selectedPlayerId').value;
+        if (!playerId) {
+            e.preventDefault();
+            alert('Por favor, selecciona un alumno de la lista antes de emitir el recibo.');
+        }
+    });
+</script>
 {% endblock %}

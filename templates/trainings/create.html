@@ -3,61 +3,198 @@
 {% block title %}Programar Sesión - Escuela FC{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-12 col-md-8">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold mb-0">⚽ Programar Entrenamiento</h3>
-            <a href="{{ url_for('trainings.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left"></i> Volver
+<style>
+    /* Tarjeta principal estilo bandeja de acrílico translúcido */
+    .glass-training-wrapper {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.90) 0%, rgba(248, 249, 250, 0.78) 100%);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 2px solid rgba(212, 175, 115, 0.55);
+        border-radius: 28px;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        padding: 2.4rem 2.8rem;
+        max-width: 960px;
+        margin: 1.2rem auto;
+    }
+
+    .form-title-glass {
+        font-weight: 800;
+        font-size: 1.45rem;
+        color: #1e293b;
+        letter-spacing: -0.5px;
+    }
+
+    /* Etiquetas */
+    .glass-label {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #1f2937;
+        margin-bottom: 0.45rem;
+        display: block;
+    }
+
+    /* Controles translúcidos */
+    .glass-control {
+        background: rgba(255, 255, 255, 0.75);
+        border: 1.8px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 0.68rem 1rem;
+        font-size: 0.92rem;
+        color: #0f172a;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+        transition: all 0.2s ease;
+    }
+    .glass-control:focus {
+        background: #ffffff;
+        border-color: #d4af73;
+        box-shadow: 0 0 0 4px rgba(212, 175, 115, 0.25);
+        outline: none;
+    }
+
+    /* Select de Categoría con borde dorado estilo slider */
+    .glass-control-gold {
+        border: 2px solid #caa469;
+        background: linear-gradient(180deg, #ffffff 0%, #faf8f5 100%);
+        font-weight: 500;
+    }
+
+    /* Selector de Jornada tipo pastilla oscura con acento dorado */
+    .glass-shift-control {
+        background: linear-gradient(90deg, #1e293b 0%, #334155 100%);
+        border: 2px solid #caa469;
+        color: #ffffff;
+        border-radius: 14px;
+        padding: 0.68rem 1rem;
+        font-weight: 600;
+    }
+    .glass-shift-control option {
+        background-color: #1e293b;
+        color: #ffffff;
+    }
+
+    /* Botón Volver con relieve 3D */
+    .btn-glass-back {
+        background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+        border: 1.5px solid #cbd5e1;
+        border-radius: 12px;
+        color: #334155;
+        font-weight: 700;
+        padding: 0.48rem 1.15rem;
+        font-size: 0.85rem;
+        text-decoration: none;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06), inset 0 1px 0 #ffffff;
+        transition: transform 0.15s ease;
+    }
+    .btn-glass-back:hover {
+        transform: translateY(-1px);
+        color: #0f172a;
+    }
+
+    /* Botón Cancelar */
+    .btn-glass-cancel {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1.5px solid #cbd5e1;
+        border-radius: 14px;
+        color: #475569;
+        font-weight: 600;
+        padding: 0.68rem 1.8rem;
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        transition: all 0.15s ease;
+    }
+    .btn-glass-cancel:hover {
+        background: #ffffff;
+        color: #0f172a;
+    }
+
+    /* Botón Guardar Sesión acabado en oro / bronce satinado */
+    .btn-glass-save {
+        background: linear-gradient(180deg, #b8864b 0%, #8c5e28 100%);
+        border: 2px solid #f7dfb2;
+        border-radius: 14px;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.68rem 2.2rem;
+        box-shadow: 0 6px 16px rgba(140, 94, 40, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-glass-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(140, 94, 40, 0.45);
+        color: #ffffff;
+    }
+    .btn-glass-save:active {
+        transform: translateY(0);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="glass-training-wrapper">
+
+        <!-- Barra Superior: Título y Volver -->
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary border-opacity-10">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fs-4">⚽</span>
+                <h3 class="form-title-glass mb-0">Programar Entrenamiento</h3>
+            </div>
+            <a href="{{ url_for('trainings.index') }}" class="btn-glass-back">
+                <i class="bi bi-arrow-left me-1"></i> Volver
             </a>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-body p-4">
-                <form action="{{ url_for('trainings.create') }}" method="POST">
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Categoría Convocada</label>
-                            <select name="category_id" class="form-select" required>
-                                <option value="" disabled>Selecciona categoría...</option>
-                                <option value="all" selected>Todas las categorías (General)</option>
-                                {% for cat in categories %}
-                                    <option value="{{ cat._id }}">{{ cat.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Jornada de Entrenamiento</label>
-                            <select name="shift" class="form-select" required>
-                                <option value="Mañana" selected>🌅 Mañana</option>
-                                <option value="Tarde">🌇 Tarde</option>
-                            </select>
-                        </div>
-                    </div>
+        <form action="{{ url_for('trainings.create') }}" method="POST">
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Fecha y Hora</label>
-                            <input type="datetime-local" name="scheduled_date" class="form-control" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Cancha / Ubicación</label>
-                            <input type="text" name="field" class="form-control" placeholder="Ej. Cancha Sintética 1" value="Cancha Principal">
-                        </div>
-                    </div>
+            <!-- Fila 1: Categoría Convocada y Jornada -->
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-md-6">
+                    <label class="glass-label">Categoría Convocada</label>
+                    <select name="category_id" class="form-select glass-control glass-control-gold" required>
+                        <option value="" disabled>Selecciona categoría...</option>
+                        <option value="all" selected>Todas las categorías (General)</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat._id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Tema / Enfoque Técnico</label>
-                        <input type="text" name="topic" class="form-control" placeholder="Ej. Definición y transición defensiva">
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ url_for('trainings.index') }}" class="btn btn-light border px-4">Cancelar</a>
-                        <button type="submit" class="btn btn-success px-4 fw-semibold">Guardar Sesión</button>
-                    </div>
-                </form>
+                <div class="col-12 col-md-6">
+                    <label class="glass-label">Jornada de Entrenamiento</label>
+                    <select name="shift" class="form-select glass-shift-control" required>
+                        <option value="Mañana" selected>🌅 Mañana</option>
+                        <option value="Tarde">🌇 Tarde</option>
+                    </select>
+                </div>
             </div>
-        </div>
+
+            <!-- Fila 2: Fecha y Hora & Cancha / Ubicación -->
+            <div class="row g-4 mb-4">
+                <div class="col-12 col-md-6">
+                    <label class="glass-label">Fecha y Hora</label>
+                    <input type="datetime-local" name="scheduled_date" class="form-control glass-control" required>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="glass-label">Cancha / Ubicación</label>
+                    <input type="text" name="field" class="form-control glass-control" placeholder="Ej. Cancha Sintética 1" value="Cancha Principal" required>
+                </div>
+            </div>
+
+            <!-- Fila 3: Tema / Enfoque Técnico -->
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <label class="glass-label">Tema / Enfoque Técnico</label>
+                    <input type="text" name="topic" class="form-control glass-control" placeholder="Ej. Definición y transición defensiva">
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="d-flex justify-content-end align-items-center gap-3 pt-3">
+                <a href="{{ url_for('trainings.index') }}" class="btn-glass-cancel">Cancelar</a>
+                <button type="submit" class="btn-glass-save">Guardar Sesión</button>
+            </div>
+
+        </form>
     </div>
 </div>
 {% endblock %}
